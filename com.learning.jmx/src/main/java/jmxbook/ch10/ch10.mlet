@@ -1,0 +1,5 @@
+<MLET CODE=jmxbook.ch10.jar.HelloWorld
+ARCHIVE=ch10.jar
+NAME=MLetAgent:name=hello1>
+</MLET>
+

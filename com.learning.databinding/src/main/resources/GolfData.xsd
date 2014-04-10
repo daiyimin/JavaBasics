@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/GolfCountryClub"
+	xmlns:tns="http://www.example.org/GolfCountryClub">
+	<element name="GolfCountryClub">
+		<complexType>
+			<sequence>
+				<element name="GolfCourse" type="tns:GolfCourseType"
+					maxOccurs="unbounded" minOccurs="1">
+				</element>
+			</sequence>
+		</complexType>
+	</element>
+	<complexType name="GolfCourseType">
+		<sequence>
+			<element name="Name" type="string">
+			</element>
+		</sequence>
+		<attribute name="NumberOfHoles" type="positiveInteger"
+			fixed="18">
+		</attribute>
+	</complexType>
+</schema> 
