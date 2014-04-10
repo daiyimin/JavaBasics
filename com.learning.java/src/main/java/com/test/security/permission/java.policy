@@ -1,0 +1,6 @@
+//keystore "file:C:/Ericsson/maworkspace/com.learning.java/mykey.store";
+grant codeBase "file:C:/Ericsson/maworkspace/com.learning.java/target/classes/*"{
+	permission java.security.AllPermission;   
+	permission java.io.FilePermission "C:/Temp/*", "read";   
+};
+

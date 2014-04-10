@@ -1,0 +1,17 @@
+keystore "file:C:/Ericsson/maworkspace/com.learning.java/mykey.store";
+
+grant signedby "friend.keystore" {     
+        permission java.io.FilePermission "C:/Temp/answer.txt", "read";   
+        permission java.io.FilePermission "C:/Temp/question.txt", "read";    
+};   
+      
+grant signedby "strange.keystore" {     
+//        permission java.io.FilePermission "C:/Temp/answer.txt", "read";   
+        permission java.io.FilePermission "C:/Temp/question.txt", "read";    
+};   
+       
+      
+grant codeBase "file:C:/Ericsson/maworkspace/com.learning.java/target/classes/*" {     
+        permission java.io.FilePermission "C:/Temp/answer.txt", "read";   
+        permission java.io.FilePermission "C:/Temp/question.txt", "read";    
+};

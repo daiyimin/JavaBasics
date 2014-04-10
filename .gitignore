@@ -1,0 +1,37 @@
+             # Eclipse files #
+*.settings*
+*.eclipse.*
+.jsdtscope
+.classpath
+.dupclasspath
+.buildnr
+.project
+
+# Ultraedit bak file #
+*.bak
+
+# Compiled source #
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*classes*/
+*build*/
+*target*/
+*target*/*
+*dist*/
+*_fast*/
+*_debug*/
+
+# Logs #
+*.log
+
+# OS generated files #
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+files/
+tags
+*.tar

@@ -1,0 +1,10 @@
+// grant permission to codeBase(codeBase should point to the classpath where the byte code, i.e. class file, is compiled to)
+// the permission is file write permission under specified folder
+
+grant codeBase "file:C:/Ericsson/maworkspace/com.learning.java/target/classes/*" {
+	permission java.io.FilePermission "C:/Ericsson/maworkspace/com.learning.java/*" , "write";
+};
+
+grant codeBase "file:C:/Ericsson/maworkspace/com.learning.java/com.learning.jar.jar" {
+	permission java.io.FilePermission "C:/Ericsson/maworkspace/com.learning.java/*" , "write";
+};
