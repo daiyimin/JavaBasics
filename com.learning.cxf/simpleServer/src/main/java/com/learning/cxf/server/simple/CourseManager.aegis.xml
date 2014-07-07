@@ -1,0 +1,7 @@
+<mappings>
+    <mapping name="CourseManager">
+        <method name="addCourse">
+            <parameter index="0" mappedName="course" nillable='false' />
+        </method>
+    </mapping>
+</mappings>

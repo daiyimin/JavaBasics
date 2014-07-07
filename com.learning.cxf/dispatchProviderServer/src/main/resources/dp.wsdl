@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="CourseManagerImpl" targetNamespace="http://simple.server.cxf.learning.com"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://apache.org/hello_world_soap_http"
+    xmlns:x1="http://apache.org/hello_world_soap_http/types"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+	<wsdl:types>
+		<xsd:schema attributeFormDefault="qualified"
+			elementFormDefault="qualified" targetNamespace="http://simple.server.cxf.learning.com">
+			<xsd:complexType name="Course">
+				<xsd:sequence>
+					<xsd:element name="courseCode" type="xsd:string" />
+					<xsd:element name="courseName" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+		</xsd:schema>
+		<xsd:schema attributeFormDefault="unqualified"
+			elementFormDefault="qualified" targetNamespace="http://simple.server.cxf.learning.com/">
+			<xsd:import namespace="http://simple.server.cxf.learning.com" />
+			<xsd:element name="addCourse" type="tns:addCourse" />
+			<xsd:complexType name="addCourse">
+				<xsd:sequence>
+					<xsd:element minOccurs="0" name="course" type="ns0:Course" />
+				</xsd:sequence>
+			</xsd:complexType>
+			<xsd:element name="addCourseResponse" type="tns:addCourseResponse" />
+			<xsd:complexType name="addCourseResponse">
+				<xsd:sequence />
+			</xsd:complexType>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="addCourse">
+		<wsdl:part element="tns:addCourse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="addCourseResponse">
+		<wsdl:part element="tns:addCourseResponse" name="parameters">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="CourseManagerImplPortType">
+		<wsdl:operation name="addCourse">
+			<wsdl:input message="tns:addCourse" name="addCourse">
+			</wsdl:input>
+			<wsdl:output message="tns:addCourseResponse" name="addCourseResponse">
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="CourseManagerImplSoapBinding" type="tns:CourseManagerImplPortType">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="addCourse">
+			<soap:operation soapAction="" style="document" />
+			<wsdl:input name="addCourse">
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output name="addCourseResponse">
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="CourseManager">
+		<wsdl:port binding="tns:CourseManagerImplSoapBinding" name="CourseManagerImplPort">
+			<soap:address location="http://localhost:9000/CourseManager" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,15 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:simple="http://cxf.apache.org/simple"
+      xmlns:soap="http://cxf.apache.org/bindings/soap"
+      xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://cxf.apache.org/bindings/soap http://cxf.apache.org/schemas/configuration/soap.xsd
+http://cxf.apache.org/simple http://cxf.apache.org/schemas/simple.xsd">
+ 
+  <simple:server id="pojoservice" serviceClass="com.learning.cxf.server.simple.HelloWorld" address="/hello_world">
+    <simple:serviceBean>
+        <bean class="com.learning.cxf.server.simple.HelloWorldImpl" />
+    </simple:serviceBean>
+  </simple:server>
+</beans>

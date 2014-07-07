@@ -1,0 +1,6 @@
+<mappings>
+    <mapping name="Course">
+		<property name="code" mappedName="courseCode" nillable='false' />
+		<property name="name" mappedName="courseName" nillable='false' />
+    </mapping>
+</mappings>
