@@ -16,6 +16,11 @@ import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 public class ExcelUtil {
+   private CellInspector inspector = null;
+   
+   public void addInspector(CellInspector inspector) {
+       this.inspector = inspector;
+   }
    
     /**
      * Read excel file and return in workbook
@@ -87,7 +92,7 @@ public class ExcelUtil {
             if (HSSFDateUtil.isCellDateFormatted(srcCell)) {
                 distCell.setCellValue(srcCell.getDateCellValue());
                 
-                // set date format in cell style
+                // set date format in cell style, otherwise distCell displays date in float number
                 HSSFWorkbook workbook = srcCell.getSheet().getWorkbook();
                 HSSFCellStyle cellStyle = workbook.createCellStyle();
                 HSSFDataFormat format= workbook.createDataFormat();
@@ -107,7 +112,7 @@ public class ExcelUtil {
         } else if (srcCellType == HSSFCell.CELL_TYPE_FORMULA) {
 //            distCell.setCellFormula(srcCell.getCellFormula());
             
-            // patch: only copy value not copy formula
+            // patch: only copy value instead of copy the formula
             srcCell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
             distCell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
             distCell.setCellValue(srcCell.getNumericCellValue());
@@ -117,7 +122,12 @@ public class ExcelUtil {
     }
     
     /**
-     * Copy sourceRect on source sheet to the destPos on dest sheet
+     * Copy sourceRect on source sheet to the destPos on dest sheet.<BR/>
+     * The destRect can be calculated based on destPos and sourceRect:<BR/>
+     * destRect.left = destPos.x<BR/>
+     * destRect.top = destPos.y<BR/>
+     * destRect.right = destPos.x + sourceRect.width<BR/>
+     * destRect.bottom = destPos.y + sourceRect.height<BR/>
      * @param source
      * @param dest
      * @param sourceRect
@@ -164,6 +174,9 @@ public class ExcelUtil {
                     if(templateCell != null) {
                         HSSFCell newCell = newRow.createCell(destPos.getX()+j);
                         copyCell(templateCell,newCell);
+                        if (inspector != null) {
+                            inspector.inspect(templateCell);
+                        }
                     }
                 }
             }
@@ -171,7 +184,96 @@ public class ExcelUtil {
     }
     
     /**
-     * Get sheet content region and return in a Rect
+    * Copy sourceRect on source sheet to the destPos on dest sheet.<BR/>
+    * The destRect can be calculated based on destPos and sourceRect:<BR/>
+    * destRect.left = destPos.x<BR/>
+    * destRect.top = destPos.y<BR/>
+    * destRect.right = destPos.x + sourceRect.width<BR/>
+    * destRect.bottom = destPos.y + sourceRect.height<BR/>
+    * Also need to append the given rows to the last row but one
+    * @param source
+    * @param dest
+    * @param sourceRect
+    * @param destPos
+    * @param rows
+    * @param rowRect content regions of the rows
+    */
+    public void copyRect(HSSFSheet source, HSSFSheet dest, Rect sourceRect, Point destPos, List<HSSFRow> rows, Rect rowRect) {
+        int targetRowFrom;
+        int targetRowTo;
+        int targetColumnFrom;
+        int targetColumnTo;
+        CellRangeAddress region = null;
+        // Copy merged cells from source sheet to dest sheet
+        for (int i = 0; i < source.getNumMergedRegions(); i++) {
+            region = source.getMergedRegion(i);
+            
+            if ((region.getFirstRow() >= sourceRect.getTop())&& 
+                 (region.getFirstColumn() >= sourceRect.getLeft()) &&
+                 (region.getLastRow() <= sourceRect.getBottom()) &&
+                 (region.getLastColumn() <= sourceRect.getRight()) ) {
+                
+                targetRowFrom = region.getFirstRow() - sourceRect.getTop() + destPos.getY();
+                targetRowTo = region.getLastRow() - sourceRect.getTop() + destPos.getY();
+                targetColumnFrom = region.getFirstColumn() - sourceRect.getLeft() + destPos.getX();
+                targetColumnTo = region.getLastColumn() - sourceRect.getLeft() + destPos.getX();
+                
+                CellRangeAddress newRegion = region.copy();
+                
+                newRegion.setFirstRow(targetRowFrom);
+                newRegion.setFirstColumn(targetColumnFrom);
+                newRegion.setLastRow(targetRowTo);
+                newRegion.setLastColumn(targetColumnTo);
+                dest.addMergedRegion(newRegion);
+            }
+        }
+        
+        // Copy each row in the rectangle
+        for (int i = 0; i < sourceRect.getHeight(); i++) {
+            if (i == sourceRect.getHeight()-1) { //reach last row
+                // insert reissue rows
+                int rowNum = 0;
+                for (HSSFRow row : rows) {
+                    HSSFRow newRow = dest.createRow(destPos.getY()+i + rowNum);
+                    newRow.setHeight(row.getHeight());
+                    
+                    for(int j=0; j < rowRect.getWidth(); j++) {
+                        HSSFCell templateCell = row.getCell(rowRect.getLeft()+j);
+                        if(templateCell != null) {
+                            HSSFCell newCell = newRow.createCell(destPos.getX()+j);
+                            copyCell(templateCell,newCell);
+                        }
+                    }
+                    rowNum++;
+                }
+            }
+            
+            HSSFRow sourceRow = source.getRow(sourceRect.getTop()+i);
+            if(sourceRow != null) {
+                HSSFRow newRow = null;
+                if (i == sourceRect.getHeight()-1) {
+                    newRow = dest.createRow(destPos.getY()+i+rows.size());    
+                } else {
+                    newRow = dest.createRow(destPos.getY()+i);    
+                }
+                newRow.setHeight(sourceRow.getHeight());
+                for(int j=0; j < sourceRect.getWidth(); j++) {
+                    HSSFCell templateCell = sourceRow.getCell(sourceRect.getLeft()+j);
+                    if(templateCell != null) {
+                        HSSFCell newCell = newRow.createCell(destPos.getX()+j);
+                        copyCell(templateCell,newCell);
+                        if (inspector != null) {
+                            inspector.inspect(templateCell);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Calculate the regions in sheet which has content<BR/>
+     * Return the region in a rectangle object.
      * @param sheet
      * @return
      */
