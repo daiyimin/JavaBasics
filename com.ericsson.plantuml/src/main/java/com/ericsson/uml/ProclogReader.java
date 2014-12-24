@@ -28,11 +28,19 @@ public class ProclogReader {
 	 */
 	private Map<String, Integer> csvIndex = null;
 	/**
-	 * proclogMap saves all proclogs for the specified RootLogId key is subLogId
-	 * (for northbound, use 0 as subLogId) value is the list of proclog which
-	 * belong to that subLogId
+	 * proclogMap saves all proclogs for the specified RootLogId key is subLogId<br/>
+	 * (for northbound, use 0 as subLogId) value is the list of proclog which<br/>
+	 * belong to that subLogId<br/>
+	 * String[] in the list represents String array of one CSV line 
 	 */
 	private TreeMap<String, List<String[]>> proclogMap = null;
+	
+	/**
+	 * svgList saves all southbound logs that will be saved as svg files<br/>
+	 * keys is svg filename<br/>
+	 * value is proclog bean<br/>
+	 */
+	private Map<String, ProclogBean> svgMap = null;
 
 	public ProclogReader(String filename) {
 		file = new File(filename);
@@ -114,14 +122,15 @@ public class ProclogReader {
 		// read proclog lines
 		List<String[]> list = csvReader.readAll();
 		for (String[] line : list) {
+			ProclogBean logbean = new ProclogBean(line, csvIndex);
 			if (line.length != colNum) {
 				continue; // this is a invalid line?
 			}
-			if (!rootLogId.equals(getCSVCellValue(line, Constants.ROOTLOGID))) {
+			if (!rootLogId.equals(logbean.getRootLogId())) {
 				continue; // not the logId being searched for
 			}
 
-			String logType = getCSVCellValue(line, Constants.LOGTYPE);
+			String logType = logbean.getLogType();
 			List<String[]> proclogs = null;
 			if (Constants.NORTHBOUND.equals(logType)) {
 				proclogs = new ArrayList<String[]>();
@@ -131,7 +140,7 @@ public class ProclogReader {
 				// assume that in proclog file, proclogs of same subLogId are
 				// written by time sequence
 				// so we put these logs into a list by their sequence in file
-				String subLogId = getCSVCellValue(line, Constants.SUBLOGID);
+				String subLogId = logbean.getSubLogId();
 				if (proclogMap.get(subLogId) == null) {
 					proclogs = new ArrayList<String[]>();
 				} else {
@@ -182,6 +191,10 @@ public class ProclogReader {
 		}
 
 	}
+	
+	public Map<String, ProclogBean> getSVGMap() {
+		return svgMap;
+	}
 
 	/**
 	 * Transform proclog map into plant UML string
@@ -190,6 +203,7 @@ public class ProclogReader {
 	 */
 	public String getUML() {
 		String uml = "@startuml\n";
+		svgMap = new HashMap<String, ProclogBean>();
 
 		Iterator<Entry<String, List<String[]>>> iter = proclogMap.entrySet()
 				.iterator();
@@ -198,6 +212,8 @@ public class ProclogReader {
 		List<String[]> proclogs = iter.next().getValue();
 		String[] northLog = proclogs.get(0);
 		ProclogBean northbean = new ProclogBean(northLog, csvIndex);
+		svgMap.put("req0.svg", northbean);
+		svgMap.put("res0.svg", northbean);
 
 		uml += "hide footbox\n";
 		uml += "actor CAS\n";
@@ -220,28 +236,42 @@ public class ProclogReader {
 
 		uml += "title " + northbean.getOperation() + " "
 				+ northbean.getTarget() + "\n";
-		uml += "CAS -> PGNGN: " + northbean.getOperation() + "\n";
+		uml += "CAS -> PGNGN: [[file:///@SVGFILEPATH@/req0.svg]] " + northbean.getOperation() + "\n";
 
+		int svgFileNum = 0;
+		String svgFilename = null;
+		List<String> svgContent = null;
 		while (iter.hasNext()) {
 			proclogs = iter.next().getValue();
 
 			for (String[] proclog : proclogs) {
 				ProclogBean logbean = new ProclogBean(proclog, csvIndex);
 				if (Constants.SOUTHBOUND.equals(logbean.getLogType())) {
+					// save information for create svg
+					svgFileNum++;
+					svgFilename = "req" + new Integer(svgFileNum).toString() + ".svg";
+					svgMap.put(svgFilename, logbean);
+					
 					String request = null;
 					if (logbean.getFullrequest().length() <= 40) {
 						request = logbean.getFullrequest();
 					} else {
 						request = logbean.getFullrequest().substring(0, 40);
 					}
-					uml += "PGNGN -> " + logbean.getTarget() + ": "
-							+ request + "......\n";
+					uml += "PGNGN -> " + logbean.getTarget() + ": [[file:///@SVGFILEPATH@/" +
+							svgFilename + "]] " +
+							request + "......\n";
+					
+					svgFilename = "res" + new Integer(svgFileNum).toString() + ".svg";
+					svgMap.put(svgFilename, logbean);
 					if ("SUCCESSFUL".equals(logbean.getStatus())) {
-						uml += logbean.getTarget() + "-> PGNGN: Resp code "
+						uml += logbean.getTarget() + "-> PGNGN: "+ "[[file:///@SVGFILEPATH@/" + 
+								svgFilename + "]] " + "Resp code "
 								+ logbean.getResponseCode() + "\n";
 					} else {
 						uml += logbean.getTarget()
-								+ "-[#red]> PGNGN: <font color=red><b> (Failed) Resp code "
+								+ "-[#red]> PGNGN: "+ "[[file:///@SVGFILEPATH@/" + 
+								svgFilename + "]] " + "<font color=red><b> (Failed) Resp code "
 								+ logbean.getResponseCode() + "\n";
 						uml += "destroy " + logbean.getTarget() + "\n";
 					}
@@ -254,9 +284,9 @@ public class ProclogReader {
 			}
 		}
 		if ("SUCCESSFUL".equals(northbean.getStatus())) {
-			uml += "PGNGN -> CAS: " + northbean.getOperation() + " response\n";
+			uml += "PGNGN -> CAS: [[file:///@SVGFILEPATH@/res0.svg]] " + northbean.getOperation() + " response\n";
 		} else {
-			uml += "PGNGN -[#red]> CAS: <font color=red><b> (Failed)"
+			uml += "PGNGN -[#red]> CAS:  [[file:///@SVGFILEPATH@/res0.svg]] <font color=red><b> (Failed)"
 					+ northbean.getOperation() + " response\n";
 		}
 

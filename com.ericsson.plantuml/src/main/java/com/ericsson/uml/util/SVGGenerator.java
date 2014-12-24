@@ -20,6 +20,9 @@ public class SVGGenerator {
 	private int width;
 	private int height;
 	
+	public SVGGenerator() {
+	}
+	
 	public SVGGenerator(String filename) {
 		this.filename = filename;
 	}
@@ -74,7 +77,7 @@ public class SVGGenerator {
 	private String encodeHTMLChar(String line) {
 		String encodeStr = line.replaceAll("<", "&lt;");
 		encodeStr = encodeStr.replaceAll("\"", "&quot;");
-		encodeStr = encodeStr.replaceAll(" ", "&nbsp;");
+//		encodeStr = encodeStr.replaceAll(" ", "&nbsp;");
 		return encodeStr;
 	}
 	
@@ -82,11 +85,11 @@ public class SVGGenerator {
 	 * Parse input text into multiple lines that will be shown in SVG
 	 * Each line in input text will be broken into multiple lines in SVG which has max length: 80 chars 
 	 * @param text
-	 * @param sepeartor
+	 * @param seperator
 	 * @return
 	 * @throws Exception 
 	 */	
-	public List<String> splitText(String text, String sepeartor) throws Exception {
+	protected List<String> splitText(String text, String seperator) throws Exception {
 		
 		List<String> outputLineList = new ArrayList<String>();
 		String[] inputLines = text.split(linefeed);
@@ -97,30 +100,68 @@ public class SVGGenerator {
 			
 			String indent = getIndent(line);
 			
-			int count = indent.length();
-			String outputLine = indent;
-			String[] strs = line.split(sepeartor);
+			int count = 0;
+			String outputLine = "";
+			String[] strs = line.split(seperator);			
+			
 			for (String str: strs) {
+				if (str.isEmpty()) {
+					continue;
+				}
 				if (count + str.length() <= charPerLine) {
 					if (count > 0) {
-						outputLine += sepeartor;
+						outputLine += seperator;
+					} else {
+						count = indent.length();
+						outputLine = indent;
 					}
 					count += str.length();
 					outputLine += str;
 				} else {
 					// exceed 80 chars, create a new line
 					if (!outputLine.trim().isEmpty()) {
-						outputLine += sepeartor;
+						outputLine += seperator;
 						outputLineList.add(encodeHTMLChar(outputLine));
 					}
 					count = str.length();
-					outputLine = indent + str;
+					outputLine = indent + " " + str;
 				}
 			}
 			if (count > 0) {
 				outputLineList.add(encodeHTMLChar(outputLine));
 			}
 		}
+		return outputLineList;
+	}
+	
+	/**
+	 * Parse input text into multiple lines that will be shown in SVG
+	 * Each line in input text will be broken into multiple lines in SVG which has max length: 80 chars 
+	 * @param text
+	 * @param sepeartor
+	 * @return
+	 * @throws Exception 
+	 */	
+	protected List<String> splitLDAPText(String text, String seperator) throws Exception {
+		List<String> outputLineList = new ArrayList<String>();
+		
+		String line = null;
+		StringBuffer sb = new StringBuffer();
+		for (int i=0; i<text.length(); i++) {
+			if (sb.length() > charPerLine) {
+				outputLineList.add(line);
+				sb.replace(0, line.length(), "");
+			}
+			char curChar = text.charAt(i);
+ 			sb.append(curChar);
+			if (seperator.indexOf(curChar) != -1) {
+				line = sb.toString();
+			}
+		}
+		if (sb.length() > 0) {
+			outputLineList.add(sb.toString());
+		}
+		
 		return outputLineList;
 	}
 	
@@ -133,18 +174,19 @@ public class SVGGenerator {
 	 */
 	public void addText(int x, int y, String text, String protocol) throws Exception {
 		List<String> lines = null;
-		if (Constants.LDAP_PROTOCOL.equals(protocol)) {
-			lines = splitText(text, ",");
-		} else {
+		if (Constants.CAI3G_PROTOCOL.equals(protocol)) {
 			String inputText = XMLFormat.formatXML(text);
 			lines = splitText(inputText, " ");
+		} else {
+			lines = splitLDAPText(text, ",:");
 		}
-		
 		for (int i=0; i<lines.size(); i++) {
 			String line = lines.get(i);
-			int yCordinate = y + i*10;
-			svgString += "<text style=\"fill:black;font-size:8pt\" font-family=\"Arial\" "
-					+ "x=\""+ x + "\" y=\""+ yCordinate + "\">" + line + "</text>\n";
+			String indent = getIndent(line);
+			int xCordinate = x + indent.length()*8;
+			int yCordinate = y + i*12;
+			svgString += "<text style=\"fill:black;font-size:10pt\" font-family=\"Arial\" "
+					+ "x=\""+ xCordinate + "\" y=\""+ yCordinate + "\">" + line.trim() + "</text>\n";
 		}
 	}
 	
@@ -165,9 +207,9 @@ public class SVGGenerator {
 		writer.print(getSVGContent());
 		writer.flush();
 		os.close();
-	}
+	}	
 	
-	public static void main(String[] args) throws Exception {
+/*	public static void main(String[] args) throws Exception {
         String longXMLString = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:cai3=\"http://schemas.ericsson.com/cai3g1.2/\" xmlns:ns=\"http://schemas.ericsson.com/pg/hlr/13.5/\"><soapenv:Header><cai3:SessionId xmlns:cai3=\"http://schemas.ericsson.com/cai3g1.2/\" xmlns:ns=\"http://schemas.ericsson.com/pg/hlr/13.5/\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">6f133e1cf7944392bdbd8b2b35be67b4</cai3:SessionId></soapenv:Header><soapenv:Body>\n      <cai3:Set xmlns:cai3=\"http://schemas.ericsson.com/cai3g1.2/\" xmlns:ns=\"http://schemas.ericsson.com/pg/hlr/13.5/\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\">\n         <cai3:MOType>SubscriberData@http://schemas.ericsson.com/pg/hlr/13.5/</cai3:MOType>\n         <cai3:MOId>\n            <ns:msisdn>494601000007</ns:msisdn>\n         </cai3:MOId>\n         <cai3:MOAttributes>\n            <ns:SetSubscriberData msisdn=\"494601000007\">\n               <ns:sud>PWD-******</ns:sud>\n            </ns:SetSubscriberData>\n         </cai3:MOAttributes>\n      </cai3:Set></soapenv:Body></soapenv:Envelope>";
 		String longLDAPString = "LDAP Modify (dn: serv=CSPS,mscId=314587c8e13f4bb884929bf6ca0f3684,ou=multiSCs,dc=operator,dc=com Attributes: Attribute name: CDC, values: [7], operation: REPLACE, Attribute name: SPN, values: [1], operation: REPLACE, Attribute name: SPNTS10FNUM, values: 919499290000F0, operation: REPLACE, Attribute name: SPNTS10CCREL, values: [0], operation: REPLACE, Attribute name: SPNTS10ZCREL, values: [0], operation: REPLACE, Attribute name: SPNTS10ST, values: [6], operation: REPLACE)";
         
@@ -176,11 +218,12 @@ public class SVGGenerator {
 		svg.setHeight(600); 
 		svg.addHead();
 		svg.addHyperLink(1, 15, "BACK", "file:///C:/Ericsson/test.svg");
-//		svg.addText(1, 35, longXMLString, Constants.CAI3G_PROTOCOL);
-		svg.addText(1, 35, longLDAPString, Constants.LDAP_PROTOCOL);
+		svg.addText(1, 35, longXMLString, Constants.CAI3G_PROTOCOL);
+//		svg.addText(1, 35, longLDAPString, Constants.LDAP_PROTOCOL);
 		svg.addTail();
 		
 		svg.createSVG();
 		System.out.println(svg.getSVGContent());
 	}
+*/
 }

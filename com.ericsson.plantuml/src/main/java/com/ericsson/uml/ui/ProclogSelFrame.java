@@ -27,7 +27,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.ericsson.uml.ColorTableModel;
 import com.ericsson.uml.Constants;
 import com.ericsson.uml.ProclogReader;
+import com.ericsson.uml.util.FileUtil;
 import com.ericsson.uml.util.PlantUMLUtil;
+import com.ericsson.uml.util.ProclogSVGGenerator;
 
 public class ProclogSelFrame extends JFrame implements ActionListener{
     private JLabel label1 = new JLabel("File:");  
@@ -169,14 +171,31 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
     		return;
 		}
 		
+		// read proclog file
 		ProclogReader reader = new ProclogReader(text1.getText());
 		reader.readProclog(selectedLogId);
-		
 		String uml = reader.getUML();
-		System.out.println(uml);
 		
-		String svgfile = configs.get("outputdir") + "/" + selectedLogId + ".svg";
+		// create data folder
+		File path = new File(configs.get("outputdir") + "/" + selectedLogId);
+		if (path.exists()) {
+			FileUtil.deleteDir(path);
+		} 
+		path.mkdir();
+		
+		// write svg for sequence diagram
+		String absolutePath = path.getAbsolutePath().replace("\\", "/");
+		String svgfile = absolutePath + "/sequence.svg";
+		uml = uml.replaceAll("@SVGFILEPATH@", absolutePath);
+		System.out.println(uml);
 		PlantUMLUtil.transformStringToSVG(uml, svgfile);
+		
+		// write svg for proclog
+		try {
+			ProclogSVGGenerator.createSVGOfProclog(reader.getSVGMap(), absolutePath, svgfile);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		SVGDialog picture = new SVGDialog(svgfile);
 		picture.show();

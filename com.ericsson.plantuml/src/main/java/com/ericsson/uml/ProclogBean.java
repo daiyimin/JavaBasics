@@ -9,6 +9,7 @@ public class ProclogBean {
 	private String target;
 	private String operation;
 	private String fullrequest;
+	private String fullresponse;
 	private String responseCode;
 	private String protocol;
 	private String logType;
@@ -59,6 +60,12 @@ public class ProclogBean {
 	public void setFullrequest(String fullrequest) {
 		this.fullrequest = fullrequest;
 	}
+	public String getFullresponse() {
+		return fullresponse;
+	}
+	public void setFullresponse(String fullresponse) {
+		this.fullresponse = fullresponse;
+	}
 	public String getResponseCode() {
 		return responseCode;
 	}
@@ -91,6 +98,7 @@ public class ProclogBean {
 	}
 	
 	private void parseProclog() {
+		fullresponse = getCSVCellValue(proclog, Constants.FULLRESPONSE);
 		fullrequest = getCSVCellValue(proclog, Constants.FULLREQUEST);
 		logType = getCSVCellValue(proclog, Constants.LOGTYPE);
 		operation = getCSVCellValue(proclog, Constants.OPERATION);

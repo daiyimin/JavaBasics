@@ -8,6 +8,7 @@ public class Constants {
 	public static final String TARGET = "Target";
 	public static final String PROTOCOL = "Protocol";
 	public static final String FULLREQUEST = "FullRequest";
+	public static final String FULLRESPONSE = "FullResponse";
 	public static final String RESPCODE = "ResponseCode";
 	public static final String STATUS = "Status";
 
@@ -21,5 +22,6 @@ public class Constants {
 	public static final String FRAME_TITLE = "Select your proclog and input proclogId";
 	
 	public static final String LDAP_PROTOCOL = "LDAP";
-	public static final String CAI3G_PROTOCOL = "CAI3G";
+	public static final String CAI3G_PROTOCOL = "CAI3G1_2";
+	public static final String TELNET_PROTOCOL = "TELNET";
 }
