@@ -1,7 +1,8 @@
-package com.ericsson.uml;
+package com.ericsson.uml.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +18,7 @@ public class PlantUMLUtil {
 	 * @param png   PNG file output stream
 	 * @throws IOException
 	 */
-	public static void transfromStringToUML(String source, OutputStream png) throws IOException {
+	public static void transformStringToUML(String source, OutputStream png) throws IOException {
 		SourceStringReader reader = new SourceStringReader(source);
 		// Write the first image to "png"
 		String desc = reader.generateImage(png);
@@ -30,16 +31,39 @@ public class PlantUMLUtil {
 	 * @param png   PNG file name
 	 * @throws IOException
 	 */
-	public static void transfromStringToUML(String source, String png) throws IOException {
+	public static void transformStringToUML(String source, String png) throws IOException {
 		File f = new File(png);
 		if (f.exists()) {
 			f.delete();
 		}
 		f = new File(png);
 		OutputStream pngStream = new FileOutputStream(f, true);
-		transfromStringToUML(source, pngStream);
+		transformStringToUML(source, pngStream);
 	}
 	
+	/**
+	 * 
+	 * @param source  Source UML string
+	 * @param svg SVG file output stream
+	 * @throws IOException 
+	 */
+	public static void transformStringToSVG(String source, OutputStream svg) throws IOException {
+		 SourceStringReader reader = new SourceStringReader(source);
+		 String desc = reader.generateImage(svg, new FileFormatOption(FileFormat.SVG));
+		 svg.close();
+	}
+	
+	/**
+	 * 
+	 * @param source  Source UML string
+	 * @param svg SVG file name
+	 * @throws IOException 
+	 */
+	public static void transformStringToSVG(String source, String svg) throws IOException {
+		File f = new File(svg);
+		OutputStream svgStream = new FileOutputStream(f, true);
+		transformStringToSVG(source, svgStream);
+	}
 	
 	public static void main(String[] args) throws IOException {
 		OutputStream png = null;

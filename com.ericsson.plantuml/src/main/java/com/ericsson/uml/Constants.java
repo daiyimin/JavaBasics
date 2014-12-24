@@ -19,4 +19,7 @@ public class Constants {
 	public static final String CONFIG_FILENAME = "config.prop";
 	
 	public static final String FRAME_TITLE = "Select your proclog and input proclogId";
+	
+	public static final String LDAP_PROTOCOL = "LDAP";
+	public static final String CAI3G_PROTOCOL = "CAI3G";
 }

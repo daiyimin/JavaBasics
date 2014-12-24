@@ -4,9 +4,9 @@
 	<groupId>com.ericsson.plantuml</groupId>
 	<artifactId>com.ericsson.plantuml</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	
 
-	
+
+
 	<dependencies>
 		<dependency>
 			<groupId>net.sourceforge.plantuml</groupId>
@@ -19,6 +19,16 @@
 			<artifactId>opencsv</artifactId>
 			<version>3.1</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>batik</groupId>
+			<artifactId>batik-swing</artifactId>
+			<version>1.6-1</version>
+		</dependency>
+		<dependency>
+			<groupId>dom4j</groupId>
+			<artifactId>dom4j</artifactId>
+			<version>1.6</version>
 		</dependency>
 	</dependencies>
 

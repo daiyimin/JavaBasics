@@ -1,4 +1,4 @@
-package com.ericsson.uml;
+package com.ericsson.uml.ui;
 
 /*************************************************************************
  *  Compilation:  javac Picture.java

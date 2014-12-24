@@ -1,4 +1,4 @@
-package com.ericsson.uml;
+package com.ericsson.uml.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Point;
@@ -24,6 +24,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.ericsson.uml.ColorTableModel;
+import com.ericsson.uml.Constants;
+import com.ericsson.uml.ProclogReader;
+import com.ericsson.uml.util.PlantUMLUtil;
+
 public class ProclogSelFrame extends JFrame implements ActionListener{
     private JLabel label1 = new JLabel("File:");  
     private JTextField text1 = new JTextField();
@@ -31,7 +36,7 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
     private JButton browseButton = new JButton("Select");
     ColorTableModel model = null;  
     private JTable proclogIdTable = null;
-    private JButton transButton = new JButton("ConvertUML");
+    private JButton transButton = new JButton("Visualize");
     private JButton exitButton = new JButton("Exit");
     
 	private Map<String, String> configs;
@@ -111,7 +116,7 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
 	        }  else if (e.getSource().equals(exitButton)) {
 	        	closeWindow();
 	        }  else if (e.getSource().equals(transButton)) {
-	        	transformUML();
+	        	visualize();
 	        }	        
 		} catch (IOException e1) {
 		}
@@ -119,11 +124,11 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
 	}
 
     private void openFolder() throws IOException {
-        int state = jfc.showOpenDialog(this);// 此句是打开文件选择器界面的触发语句  
+        int state = jfc.showOpenDialog(this); 
         if (state == 1) {  
             return;  
         } else {  
-            File f = jfc.getSelectedFile();// f为选择到的目录
+            File f = jfc.getSelectedFile();
             String file = f.getPath();
             text1.setText(file);
             
@@ -136,9 +141,7 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
             }
             model.setRowData(proclogIdList);
             model.fireTableChanged(null, 200);
-
         }
-        
     }
     
     private void closeWindow() {
@@ -146,7 +149,7 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
     }
     
     
-    private void transformUML() throws IOException {
+    private void visualize() throws IOException {
 		String selectedLogId = "";
 		int count = 0;
 		for (Object proclogSel : proclogIdList) {
@@ -172,10 +175,10 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
 		String uml = reader.getUML();
 		System.out.println(uml);
 		
-		String pngfile = configs.get("outputdir") + "/" + selectedLogId + ".png";
-		PlantUMLUtil.transfromStringToUML(uml, pngfile);
+		String svgfile = configs.get("outputdir") + "/" + selectedLogId + ".svg";
+		PlantUMLUtil.transformStringToSVG(uml, svgfile);
 		
-		Picture picture = new Picture(pngfile);
+		SVGDialog picture = new SVGDialog(svgfile);
 		picture.show();
     }
 	

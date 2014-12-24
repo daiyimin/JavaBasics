@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.ericsson.uml.ui.ProclogSelFrame;
+import com.ericsson.uml.util.PlantUMLUtil;
+
 import net.sourceforge.plantuml.SourceStringReader;
 
 public class Main {
@@ -39,7 +42,7 @@ public class Main {
 		System.out.println(uml);
 		
 		String pngfile = configs.get("outputdir") + "/" + configs.get("outputfile");
-		PlantUMLUtil.transfromStringToUML(uml, pngfile);
+		PlantUMLUtil.transformStringToUML(uml, pngfile);
 	}
 	
 	/**
