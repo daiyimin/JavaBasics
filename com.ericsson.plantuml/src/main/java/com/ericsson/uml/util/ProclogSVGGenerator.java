@@ -13,14 +13,27 @@ public class ProclogSVGGenerator extends SVGGenerator {
 			svg.setWidth(800);
 			svg.setHeight(600); 
 			svg.addHead();
-			svg.addHyperLink(1, 15, "BACK", "file:///" + link);
+			int nextY = svg.addHyperLink(1, 15, "BACK", "file:///" + link);
 			
 			ProclogBean bean = svgMap.get(filename);
-			if (filename.startsWith("req")) {
-				svg.addText(1, 35, bean.getFullrequest(), bean.getProtocol());
-			} else {
-				svg.addText(1, 35, bean.getFullresponse(), bean.getProtocol());
+			
+			if (filename.startsWith("req0")) { // northbound request
+				nextY = svg.addText(1, nextY, bean.getFullrequest(), bean.getProtocol());
+			} else if (filename.startsWith("res0")){ // northbound response
+				nextY = svg.addText(1, nextY, bean.getFullresponse(), bean.getProtocol());
+			} else { // southbound request & response
+				nextY = svg.addH0(1, nextY, "SubLogId:");
+				nextY = svg.addText(1, nextY, bean.getSubLogId(), Constants.LDAP_PROTOCOL); // add plain text, protocol is not important
+				nextY = svg.addH0(1, nextY + 8, "FullRequest:");
+				nextY = svg.addText(1, nextY, bean.getFullrequest(), bean.getProtocol());
+				nextY = svg.addH0(1, nextY + 8, "FullResponse:");
+				nextY = svg.addText(1, nextY, bean.getFullresponse(), bean.getProtocol());
+				nextY = svg.addH0(1, nextY + 8, "ResponseCode:");
+				nextY = svg.addText(1, nextY, bean.getResponseCode(), bean.getProtocol());
 			}
+
+			nextY = svg.addHyperLink(1, nextY + 8, "BACK", "file:///" + link);
+
 			svg.addTail();
 			svg.createSVG();
 		}

@@ -197,7 +197,7 @@ public class ProclogSelFrame extends JFrame implements ActionListener{
 			e.printStackTrace();
 		}
 		
-		SVGDialog picture = new SVGDialog(svgfile);
+		SVGDialog picture = new SVGDialog(svgfile, selectedLogId);
 		picture.show();
     }
 	

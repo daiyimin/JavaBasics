@@ -48,13 +48,22 @@ public class SVGGenerator {
 					 "</svg>";
 	}
 	
-	public void addHyperLink(int x, int y, String text, String link) {
+	/**
+	 * add hyperlink in svg
+	 * @param x
+	 * @param y
+	 * @param text
+	 * @param link
+	 * @return y coordinate of next line
+	 */
+	public int addHyperLink(int x, int y, String text, String link) {
 		svgString += "<a xlink:href=\"" + link + "\" xlink:title=\"" + text + "\">\n" +
-					 "<text fill=\"blue\" font-family=\"Arial\" font-size=\"12pt\" " +
+					 "<text fill=\"blue\" font-family=\"sans-serif\" font-size=\"12pt\" " +
 					 "font-weight=\"bold\" lengthAdjust=\"spacingAndGlyphs\" textLength=\"40\" " +
 					 "x=\""+ x + "\" y=\""+ y + "\">" + text +
 					 "</text>\n" +
 					 "</a>\n";
+		return y + 20;
 	}
 	
 	/**
@@ -148,7 +157,7 @@ public class SVGGenerator {
 		String line = null;
 		StringBuffer sb = new StringBuffer();
 		for (int i=0; i<text.length(); i++) {
-			if (sb.length() > charPerLine) {
+			if (sb.length() > charPerLine && line != null) {
 				outputLineList.add(line);
 				sb.replace(0, line.length(), "");
 			}
@@ -166,29 +175,91 @@ public class SVGGenerator {
 	}
 	
 	/**
-	 * font size 8pt, /80 chars per line
+	 * Parse input text into multiple lines that will be shown in SVG
+	 * Each line in input text will be broken into multiple lines in SVG which has max length: 80 chars 
+	 * @param text
+	 * @param sepeartor
+	 * @return
+	 * @throws Exception 
+	 */	
+	protected List<String> splitTelnetText(String text, String seperator) throws Exception {
+		List<String> outputLineList = new ArrayList<String>();
+		
+		String line = null;
+		StringBuffer sb = new StringBuffer();
+		for (int i=0; i<text.length(); i++) {
+			char curChar = text.charAt(i);
+			if (curChar == '\n') {
+				outputLineList.add(sb.toString());
+				sb.delete(0, sb.length());
+				continue;
+			}
+			
+			if (sb.length() > charPerLine && line != null) {
+				outputLineList.add(line);
+//				sb.replace(0, line.length(), "");
+				sb.delete(0, line.length());
+			}
+ 			sb.append(curChar);
+			if (seperator.indexOf(curChar) != -1) {
+				line = sb.toString();
+			}
+		}
+		if (sb.length() > 0) {
+			outputLineList.add(sb.toString());
+		}
+		
+		return outputLineList;
+	}
+
+	
+	/**
+	 * add text into svg<br/>
+	 * font size 8pt, maximum 80 chars per line
 	 * @param x
 	 * @param y
 	 * @param text
+	 * @return y coordinate of next line
 	 * @throws Exception 
 	 */
-	public void addText(int x, int y, String text, String protocol) throws Exception {
+	public int addText(int x, int y, String text, String protocol) throws Exception {
 		List<String> lines = null;
 		if (Constants.CAI3G_PROTOCOL.equals(protocol)) {
 			String inputText = XMLFormat.formatXML(text);
 			lines = splitText(inputText, " ");
-		} else {
-			lines = splitLDAPText(text, ",:");
+		} else if (Constants.LDAP_PROTOCOL.equals(protocol)) {
+			lines = splitLDAPText(text, ",:\n");
+		} else if (Constants.TELNET_PROTOCOL.equals(protocol)) {
+			lines = splitTelnetText(text, ",:");
 		}
 		for (int i=0; i<lines.size(); i++) {
 			String line = lines.get(i);
 			String indent = getIndent(line);
 			int xCordinate = x + indent.length()*8;
 			int yCordinate = y + i*12;
-			svgString += "<text style=\"fill:black;font-size:10pt\" font-family=\"Arial\" "
+			svgString += "<text style=\"fill:black;font-size:10pt\" font-family=\"sans-serif\" "
 					+ "x=\""+ xCordinate + "\" y=\""+ yCordinate + "\">" + line.trim() + "</text>\n";
 		}
+		return y + lines.size()*12;
 	}
+	
+	/**
+	 * add Heading 0<br/>
+	 * font size 12pt, maximum 80 chars per line
+	 * @param x
+	 * @param y
+	 * @param text
+	 * @return y coordinate of next line
+	 * @throws Exception 
+	 */
+	public int addH0(int x, int y, String text) throws Exception {
+		svgString += "<text fill=\"green\" font-family=\"sans-serif\" font-size=\"12pt\" " +
+				 "font-weight=\"bold\" lengthAdjust=\"spacingAndGlyphs\" " +
+				 "x=\""+ x + "\" y=\""+ y + "\">" + text +
+				 "</text>\n";
+		return y + 20;
+	}
+
 	
 	public String getSVGContent() {
 		svgString = svgString.replaceAll("@WIDTH@", new Integer(width).toString());

@@ -16,25 +16,28 @@ import org.apache.batik.swing.svg.GVTTreeBuilderEvent;
 
 public class SVGDialog {
 
-    public static void main(String[] args) throws IOException {
+/*    public static void main(String[] args) throws IOException {
     	File f = new File("c:\\Ericsson\\test.svg");
-    	SVGDialog app = new SVGDialog(f);
+    	SVGDialog app = new SVGDialog(f, "rootLogId");
     	app.show();
     }
-
+*/
     // The frame.
     protected JFrame frame = null;
     protected File file;
+    protected String title = "";
 
     // The SVG canvas.
     protected JSVGCanvas svgCanvas = new JSVGCanvas();
 
-    public SVGDialog(File file) {
+    public SVGDialog(File file, String title) {
         this.file = file;
+        this.title = title;
     }
 
-    public SVGDialog(String filename) {
+    public SVGDialog(String filename, String title) {
         this.file = new File(filename);
+        this.title = title;
     }
 
     public JComponent createComponents() throws IOException {
@@ -68,7 +71,11 @@ public class SVGDialog {
 
             // Display the frame.
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            frame.setTitle(file.getName());
+            if (title.isEmpty()) {
+                frame.setTitle(file.getName());
+            } else {
+                frame.setTitle(title);
+            }
             frame.pack();
             frame.setVisible(true);
         }
