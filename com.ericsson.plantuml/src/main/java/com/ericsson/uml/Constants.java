@@ -19,7 +19,7 @@ public class Constants {
 	// config filename
 	public static final String CONFIG_FILENAME = "config.prop";
 	
-	public static final String FRAME_TITLE = "Proclog visualizor       -- by CBC EMA SM";
+	public static final String FRAME_TITLE = "Proclog visualizor ver1.1      -- by CBC EMA SM";
 	
 	public static final String LDAP_PROTOCOL = "LDAP";
 	public static final String CAI3G_PROTOCOL = "CAI3G1_2";

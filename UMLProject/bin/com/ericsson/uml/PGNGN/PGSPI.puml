@@ -1,0 +1,34 @@
+@startuml
+actor BSS
+
+BSS -> ScheduleProcedurePrintLogic: PGSPI
+activate ScheduleProcedurePrintLogic
+note over BSS, ScheduleProcedurePrintLogic
+Schedule a LOCATION procedure once a day
+end note
+ScheduleProcedurePrintLogic -> BSS:
+deactivate ScheduleProcedurePrintLogic
+
+control Scheduler
+Scheduler -> ScheduleProcedureLocationPrinter: process()
+
+activate ScheduleProcedureLocationPrinter
+ScheduleProcedureLocationPrinter -> ScheduleProcedureLocationPrinter: performMassiveSearch()
+activate ScheduleProcedureLocationPrinter
+database CUDB
+ScheduleProcedureLocationPrinter -> CUDB: ldap search
+deactivate ScheduleProcedureLocationPrinter
+
+ScheduleProcedureLocationPrinter -> LocationsCache: update()
+activate LocationsCache
+database file
+LocationsCache -> file: write file
+
+LocationsCache -> ScheduleProcedureLocationPrinter:
+deactivate LocationsCache
+
+
+ScheduleProcedureLocationPrinter -> Scheduler:
+deactivate ScheduleProcedureLocationPrinter
+
+@enduml

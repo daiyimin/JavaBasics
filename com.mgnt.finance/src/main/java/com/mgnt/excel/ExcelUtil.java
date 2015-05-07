@@ -291,13 +291,15 @@ public class ExcelUtil {
         }
         
         for (int i=firstRow; i<=lastRow; i++) {
-            int tmpNum = sheet.getRow(i).getLastCellNum();
-            if (tmpNum > lastCol) {
-                lastCol = tmpNum;
-            }
-            tmpNum = sheet.getRow(i).getFirstCellNum();
-            if (tmpNum < firstCol) {
-                firstCol = tmpNum;
+            if (sheet.getRow(i) != null) {
+                int tmpNum = sheet.getRow(i).getLastCellNum();
+                if (tmpNum > lastCol) {
+                    lastCol = tmpNum;
+                }
+                tmpNum = sheet.getRow(i).getFirstCellNum();
+                if (tmpNum < firstCol) {
+                    firstCol = tmpNum;
+                }
             }
         }
         Rect rect = new Rect(firstRow, firstCol, lastRow, lastCol);

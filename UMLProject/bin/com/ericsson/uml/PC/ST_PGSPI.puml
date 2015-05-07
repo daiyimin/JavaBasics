@@ -1,0 +1,36 @@
+@startuml
+actor BSS
+control Scheduler
+
+box "PG" #LightBlue
+	participant Scheduler
+	participant PG
+end box
+
+BSS -> PG: Step 1:  PGSPI,...,INTERVAL=1D,...;
+PG -> BSS:
+deactivate PG
+
+Scheduler -> PG: run scheduled procedure 
+activate PG
+
+note over Scheduler, PG
+Triggered by Scheduler per day
+end note
+
+database CUDB
+PG -> CUDB: ldap search sub data
+activate CUDB
+CUDB -> PG:
+deactivate CUDB
+
+database DISK
+PG -> DISK: write result file
+activate DISK
+DISK -> PG:
+deactivate DISK
+
+PG -> Scheduler:
+deactivate PG
+
+@enduml

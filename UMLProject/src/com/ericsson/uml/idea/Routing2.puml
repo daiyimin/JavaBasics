@@ -1,0 +1,17 @@
+@startuml
+start
+:Format checking;
+:PL business logic;
+:NL business logic;
+:Send to NE(Add NE, routing attribute, attribute value in TCP header);
+stop
+@enduml
+
+Limitation:
+1) Not applicable for NE cluster
+2) Not applicable for multi-version NE
+
+Benefit:
+1) Improve provisioning node performance
+2) Additional server for provisioning routing, which can be controlled by SDN.
+Ready for provisioning NE in cloud.

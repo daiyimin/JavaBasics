@@ -1,0 +1,33 @@
+@startuml
+actor operator
+
+operator -> PG: Step 1: run PGSPI once
+activate PG
+
+database DISK
+PG -> DISK: generate location cache file
+activate DISK
+DISK -> PG:
+deactivate DISK
+
+PG -> operator:
+deactivate PG
+
+operator -> PG: Step 2: run HESPLSP
+activate PG
+
+database DISK
+PG -> DISK: generate HESPLSP result file
+activate DISK
+DISK -> PG:
+deactivate DISK
+
+PG -> operator:
+deactivate PG
+
+operator -> PG: Step 3: get HESPLSP result file by SFTP
+activate PG
+PG -> operator: 
+deactivate PG
+
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+
+box "DVE-Resource-Deployer" #Yellow
+	participant ConnectionPoolRegistry
+	participant StatefulAlarm
+end box
+
+box "JCA-XXX" #LightGreen
+	participant ManagedConnectionFactoryImpl
+end box
+
+box "DVE-Core" #LightGrey
+	participant DataRepository
+	participant AbstractDataRepositoryGroup.MBeanNotificationListener
+	participant DataRepositoryGroupRoundRobin	
+end box
+
+
+[-> ConnectionPoolRegistry: runHeartBeatCheck()
+ConnectionPoolRegistry -> ManagedConnectionFactoryImpl: getInvalidConnections()
+activate ManagedConnectionFactoryImpl
+ManagedConnectionFactoryImpl -> ConnectionPoolRegistry: throw UnavailableException exception
+destroy ManagedConnectionFactoryImpl
+
+ConnectionPoolRegistry -> StatefulAlarm: raise()
+activate StatefulAlarm
+
+StatefulAlarm -> DataRepository: communicationDown()
+activate DataRepository
+
+DataRepository -> AbstractDataRepositoryGroup.MBeanNotificationListener: handleNotification()
+note over DataRepository, AbstractDataRepositoryGroup.MBeanNotificationListener
+This step is triggered by JMX annotation: 
+@JmxNotification(baseType = "com.ericsson.dve.communication", 
+type = "com.ericsson.dve.communication.down"...
+end note
+activate AbstractDataRepositoryGroup.MBeanNotificationListener
+
+AbstractDataRepositoryGroup.MBeanNotificationListener -> DataRepositoryGroupRoundRobin: handleCommunicationDownNotification()
+DataRepositoryGroupRoundRobin -> AbstractDataRepositoryGroup.MBeanNotificationListener:
+
+AbstractDataRepositoryGroup.MBeanNotificationListener -> DataRepository:
+deactivate AbstractDataRepositoryGroup.MBeanNotificationListener
+
+DataRepository -> StatefulAlarm:
+deactivate DataRepository
+
+StatefulAlarm -> ConnectionPoolRegistry:
+deactivate StatefulAlarm
+
+
+
+@enduml

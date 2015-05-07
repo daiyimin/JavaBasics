@@ -1,0 +1,32 @@
+@startuml
+start
+
+:Create BOM;
+note right
+<b>Instruction to create BOM:</b>
+Login Partner Platforms and download Configuration Model excel file.
+Fill in the number of HP blade server, HP chassis, DELL storage.
+Push ctrl+shift+B on "HP Blade X" sheet.
+end note
+
+:For HP hardware spec, ask OEM contact
+Jennifer Patricio is responsible for HP hardware;
+note right
+<b>Instruction to get HP spec:</b>
+Jennifer will provide link to quick spec
+C7000:  http://h18004.www1.hp.com/products/quickspecs/12810_div/12810_div.HTML
+BL460Gen9: http://h18004.www1.hp.com/products/quickspecs/15052_div/15052_div.HTML 
+end note
+
+:For Dell storage spec, ask OEM contact
+Amin Daya is responsible for OEM storage;
+note right
+<b>Instruction to get Dell Storage spec:</b>
+1) Ask OEM contact, Amin Daya
+OEM Hardware Environmental calculation sheet, LCM COMPONENT TEMPLATE
+2) Ask Dell sales support, Larry_Zhang@Dell.com
+3) Search in PIWin
+end note
+
+end
+@enduml

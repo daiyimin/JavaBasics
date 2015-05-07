@@ -1,0 +1,18 @@
+@startuml
+start
+if (Is assocId in MOId?) then (yes)
+  :Current Creat IMS Association logic;
+elseif (Is IMPI in MOID)  then (yes)
+  :Check IMPI and privateUserId;
+  :Generate assocId;
+  :Current Creat IMS Association logic;
+elseif (Is IMPU in MOID) then (yes)
+  :Check IMPU and publicIdValue;
+  :Generate assocId;
+  :Current Creat IMS Association logic;
+else
+  stop
+endif
+
+stop
+@enduml
