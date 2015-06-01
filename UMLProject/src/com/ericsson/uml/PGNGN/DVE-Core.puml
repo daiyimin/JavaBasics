@@ -1,0 +1,124 @@
+@startuml
+
+box "DVE core" #LightGreen
+	participant DataViewEngineBean
+	participant TargetExecutor
+	participant TargetRegistryImpl
+	participant TargetCallable
+	participant JavaDataViewFactoryProxy
+	participant JavaDataViewProxy
+end box
+box "JDV-HSS-EPS" #LightYellow
+	participant HSSProvisioningJavaDataView
+end box
+box "Java Core API" #LightBlue
+	participant TargetThreadPoolExecutor
+end box
+
+[-> DataViewEngineBean: execute()
+activate DataViewEngineBean
+DataViewEngineBean -> DataViewEngineBean: executePreProcessors()
+activate DataViewEngineBean
+deactivate DataViewEngineBean
+DataViewEngineBean -> TargetExecutor: execute()
+note left
+TargetExecutor extends TargetExecutorAbstract
+end note
+activate TargetExecutor
+TargetExecutor -> TargetExecutor: internalExecute()
+activate TargetExecutor
+TargetExecutor -> TargetExecutor: verifyLicense()
+note left
+Check MO license
+end note
+activate TargetExecutor
+deactivate TargetExecutor
+
+TargetExecutor -> TargetExecutor: getTargetTriggerAndAuthorize()
+note left
+Check if user has authorize for the trigger
+end note
+activate TargetExecutor
+deactivate TargetExecutor
+
+TargetExecutor -> TargetRegistryImpl: getTarget()
+note left
+Get target using trigger
+end note
+activate TargetRegistryImpl
+TargetRegistryImpl -> JavaDataViewFactoryProxy: newInstance()
+note left
+JavaDataViewFactoryProxy implements TargetFactory interface.
+JavaDataViewFactoryProxy is registered in TargetRegistry.
+end note
+activate JavaDataViewFactoryProxy
+JavaDataViewFactoryProxy -> TargetRegistryImpl: return a JavaDataViewProxy instance
+deactivate JavaDataViewFactoryProxy
+
+TargetRegistryImpl -> TargetExecutor
+deactivate TargetRegistryImpl
+TargetExecutor -> TargetExecutor: createTargetCallable()
+activate TargetExecutor
+deactivate TargetExecutor
+
+TargetExecutor -> TargetThreadPoolExecutor: submit()
+activate TargetThreadPoolExecutor
+TargetThreadPoolExecutor -> TargetCallable: call()
+activate TargetCallable
+TargetCallable -> TargetCallable: executeOperation()
+activate TargetCallable
+TargetCallable -> JavaDataViewProxy: execute()
+activate JavaDataViewProxy
+JavaDataViewProxy -> HSSProvisioningJavaDataView: execute()
+note left
+JavaDataViewProxy forward request to real HSSProvisioningJavaDataView
+end note
+
+activate HSSProvisioningJavaDataView
+HSSProvisioningJavaDataView -> JavaDataViewProxy
+deactivate HSSProvisioningJavaDataView
+
+JavaDataViewProxy -> TargetCallable
+deactivate JavaDataViewProxy
+
+deactivate TargetCallable
+TargetCallable -> TargetCallable: handleResponse()
+activate TargetCallable
+TargetCallable -> TargetCallable: modifyCapacityCounters()
+note left
+Update license capacity
+end note
+
+activate TargetCallable
+deactivate TargetCallable
+
+deactivate TargetCallable
+
+TargetCallable -> TargetThreadPoolExecutor
+deactivate TargetCallable
+
+TargetThreadPoolExecutor -> TargetExecutor
+deactivate TargetThreadPoolExecutor
+TargetExecutor -> TargetExecutor: getResponse()
+activate TargetExecutor
+deactivate TargetExecutor
+
+TargetExecutor -> TargetExecutor: notifyTargetExecutorListener()
+activate TargetExecutor
+deactivate TargetExecutor
+
+TargetExecutor -> TargetExecutor: logPoint()
+activate TargetExecutor
+deactivate TargetExecutor
+
+deactivate TargetExecutor
+TargetExecutor -> DataViewEngineBean
+deactivate TargetExecutor
+
+DataViewEngineBean -> DataViewEngineBean: executePostProcessors()
+activate DataViewEngineBean
+deactivate DataViewEngineBean
+
+deactivate DataViewEngineBean
+
+@enduml

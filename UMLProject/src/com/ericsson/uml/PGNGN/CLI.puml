@@ -26,11 +26,11 @@ activate CliSocketSessionImpl
 CliSocketSessionImpl -> CliSocketSessionImpl: run()
 activate CliSocketSessionImpl
 CliSocketSessionImpl -> CliSocketSessionImpl: processInput()
-activate CliSocketSessionImpl
-CliSocketSessionImpl -> CliProtocolParserImpl: getJobRequest()
 note left
 if HECDAPI request comes in, get AsynchroneMmlRequest instance
 end note
+activate CliSocketSessionImpl
+CliSocketSessionImpl -> CliProtocolParserImpl: getJobRequest()
 activate CliProtocolParserImpl
 CliProtocolParserImpl -> CliSocketSessionImpl
 deactivate CliProtocolParserImpl
