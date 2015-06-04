@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import com.ericsson.tc.ConfigTool;
 import com.ericsson.tc.util.cmdline.ExecCmd;
@@ -17,7 +16,8 @@ import com.ericsson.tc.util.cmdline.ExecCmd;
 public class GETDOC {
 	private Logger logger = Logger.getLogger(GETDOC.class);
 	
-	String[] cmd;
+	private String[] cmd;
+	private String resultFilename = null;
 	
 	public GETDOC(String docNo, String lang, String rev) {
 		String getdoc = "pdi getdoc -env Prod -Format PDF " 
@@ -32,7 +32,7 @@ public class GETDOC {
 		this.cmd = cmd;
 	}
 
-	public void exec() {
+	public void exec() throws IOException{
         ExecCmd exec = new ExecCmd(cmd);
         exec.exec();
         
@@ -41,9 +41,21 @@ public class GETDOC {
         for (String s: l) {
         	sb.append(s);
         }
-        if (!sb.toString().contains("Content Saved")) {
+        
+        String response = sb.toString();
+        if (!response.contains("Content Saved")) {
         	logger.error("Fail execute " + cmd);
+        	throw new IOException("Fail to execute " + cmd);
+        } else {
+        	int start = response.indexOf("'");
+        	int end = response.indexOf("'", start + 1);
+        	resultFilename = response.substring(start + 1, end);
+    		logger.info("2400 file is downloaded to: " + resultFilename);
         }
+	}
+	
+	public String getResultFilename() {
+		return resultFilename;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -52,5 +64,7 @@ public class GETDOC {
 		
 		GETDOC getdoc = new GETDOC("2400-CAX1053952-5", "en", "G");
 		getdoc.exec();
+		
+		System.out.print(getdoc.getResultFilename());
 	}
 }

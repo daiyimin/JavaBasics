@@ -14,6 +14,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 
+import com.ericsson.tc.ConfigTool;
 import com.ericsson.tc.util.poi.excel.ExcelUtil;
 
 /**
@@ -67,7 +68,6 @@ public class SVLReader implements Iterator {
 	
     private String path;
     private String srcFile;
-    private String password;
     private int type;
     private List<HSSFSheet> sheetList;
     private Map<String, Integer> colName2No;
@@ -87,10 +87,9 @@ public class SVLReader implements Iterator {
      * @param type
      * 				Commercial or FOSS
      */
-	public SVLReader(String path, String filename, String password, int type) {
+	public SVLReader(String path, String filename, int type) {
         this.path = path;
         this.srcFile = filename;
-        this.password = password;
         this.type = type;
         handler = new ExcelUtil();
 	}
@@ -101,6 +100,7 @@ public class SVLReader implements Iterator {
 	 * @throws GeneralSecurityException 
 	 */
 	public void readSVL() throws IOException, GeneralSecurityException {
+		String password = ConfigTool.getConfig("svl.pg.password");
         HSSFWorkbook wb = handler.readEncryptedExcel(path + srcFile, password);
         sheetList = new ArrayList<HSSFSheet>();
         
@@ -136,7 +136,7 @@ public class SVLReader implements Iterator {
 	}
 
 	/**
-	 * 
+	 * Check if has next 3PP in SVL
 	 */
 	public boolean hasNext() {
 		int maxSheetNo = 0;
@@ -212,6 +212,9 @@ public class SVLReader implements Iterator {
 		return false;
 	}
 
+	/**
+	 * Read next 3PP from SVL and compose a SVL3PPBean
+	 */
 	public SVL3PPBean next() {
         int sheetNo = pos.getSheet();
         int rowNo = pos.getRow();
@@ -225,9 +228,9 @@ public class SVLReader implements Iterator {
 		return bean;
 	}
 	
-	public static void main(String...args) {
-		String localDir = System.getProperty("user.dir") + "/";
-		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", "pgpg", PGN_Commercial );
+	public static void main(String...args) throws IOException {
+		ConfigTool.loadConfig();
+		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", PGN_Commercial );
 		try {
 			reader.readSVL();
 			int count = 0;

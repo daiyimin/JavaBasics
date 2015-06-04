@@ -3,6 +3,7 @@ start
 :Get release date from EMA PP Planning meeting;
 if (TC impacted by release? Such as new price object added?) then(yes)
 	:Collect input: Product Packaging Configuration Rule(Cecilia Nordquist);
+	:Collect input: SVL(Yinghai & Toiwo);
 	:Update "EMA Ericsson Development SW.xlsx";
 else(yes)
 	:Collect input: SVL(Yinghai & Toiwo);

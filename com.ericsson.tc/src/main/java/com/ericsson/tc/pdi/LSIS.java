@@ -30,9 +30,9 @@ public class LSIS {
 	private static final String CHILD_REVISION = "ChildRevision";
 	private static final String CHILD_LANGUAGE = "ChildLanguage";
 	
-	private String childNoE;
-	private String childRevision;
-	private String childLanguage;
+	private String childNoE = null;
+	private String childRevision = null;
+	private String childLanguage = null;
 	
 	public String getChildNoE() {
 		return childNoE;
