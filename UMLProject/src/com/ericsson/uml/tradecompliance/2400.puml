@@ -2,7 +2,7 @@
 start
 :Get release date from EMA PP Planning meeting;
 if (TC impacted by release? Such as new price object added?) then(yes)
-	:Collect input: Product Packaging Configuration Rule(Cecilia Nordquist);
+	:Collect input: PPCR for PAYG and TBL(Cecilia Nordquist);
 	:Collect input: SVL(Yinghai & Toiwo);
 	:Update "EMA Ericsson Development SW.xlsx";
 else(yes)
@@ -10,6 +10,7 @@ else(yes)
 	:Update "EMA15_3PPs_Commercial.xlsx";
 	:Update "EMA15_3PPs_FOSS.xlsx";
 endif
-:Update 2400-FGC1012540.doc";
+:Update 2400-FGC1012540.doc;
+:Send to site TCA for review(Internal process);
 stop
 @enduml

@@ -1,0 +1,27 @@
+@startuml
+[-> DVECoreApplication: static:main()
+DVECoreApplication -> DVECoreApplication: init()
+activate DVECoreApplication
+DVECoreApplication -> DVECoreApplication: startCoreServices()
+activate DVECoreApplication
+DVECoreApplication -> NetworkElementServiceStarter: new instance
+activate NetworkElementServiceStarter
+NetworkElementServiceStarter -> DVECoreApplication: instanceA
+deactivate NetworkElementServiceStarter
+DVECoreApplication -> CoreServicesStarter: addCoreServiceLifeCycle(instanceA)
+activate CoreServicesStarter
+CoreServicesStarter -> DVECoreApplication
+deactivate CoreServicesStarter
+DVECoreApplication -> CoreServicesStarter: startServices()
+activate CoreServicesStarter
+CoreServicesStarter -> NetworkElementServiceStarter: start():
+activate NetworkElementServiceStarter
+NetworkElementServiceStarter -> CoreServicesStarter
+deactivate NetworkElementServiceStarter
+CoreServicesStarter -> DVECoreApplication
+deactivate CoreServicesStarter
+
+deactivate DVECoreApplication
+deactivate DVECoreApplication
+
+@enduml

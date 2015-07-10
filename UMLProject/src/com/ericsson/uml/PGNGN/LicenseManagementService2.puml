@@ -1,0 +1,42 @@
+@startuml
+
+SynchLicenseTask -> LicenseManagementService: synchLicenses()
+activate LicenseManagementService
+note right
+SynchLicenseTask is a inner class in LicenseManagementService
+It triggers a task to synchronize license cache between 
+cluster nodes every 5-10 seconds.
+end note
+LicenseManagementService -> ZooKeeperConnectionWatcherImpl: setLicenseData()
+activate ZooKeeperConnectionWatcherImpl
+ZooKeeperConnectionWatcherImpl -> ZooKeeperConnectionWatcherImpl: getPersistedLicense()
+activate ZooKeeperConnectionWatcherImpl
+note left
+Calculate new used capacity by adding delta usage of this PL blade
+and used capacity in zookeeper
+end note
+ZooKeeperConnectionWatcherImpl -> SetDataQuery: executeQuery()
+deactivate ZooKeeperConnectionWatcherImpl
+ZooKeeperConnectionWatcherImpl -> LicenseManagementService
+deactivate ZooKeeperConnectionWatcherImpl
+
+LicenseManagementService -> ZooKeeperConnectionWatcherImpl: getLicenseData()
+activate ZooKeeperConnectionWatcherImpl
+note right
+Read used capacity from zookeeper
+end note
+ZooKeeperConnectionWatcherImpl -> LicenseManagementService
+deactivate ZooKeeperConnectionWatcherImpl
+
+LicenseManagementService -> CapacityLicenseImpl: setTotalUsedCapacity()
+activate CapacityLicenseImpl
+note left
+Write used capacity to local license cache(usedCapacity)
+end note
+CapacityLicenseImpl -> LicenseManagementService
+deactivate CapacityLicenseImpl
+
+LicenseManagementService -> SynchLicenseTask
+deactivate LicenseManagementService
+
+@enduml
