@@ -43,9 +43,10 @@ public class GETDOC {
         }
         
         String response = sb.toString();
-        if (!response.contains("Content Saved")) {
-        	logger.error("Fail execute " + cmd);
-        	throw new IOException("Fail to execute " + cmd);
+        if (!response.contains("Content Saved") &&
+        		!response.contains("Successfully fetched the Eridoc file")) {
+        	logger.error("Fail execute " + cmd[2]);
+        	throw new IOException("Fail to execute " + cmd[2]);
         } else {
         	int start = response.indexOf("'");
         	int end = response.indexOf("'", start + 1);
@@ -62,7 +63,7 @@ public class GETDOC {
 		Logger logger = Logger.getLogger(GETDOC.class);
 		ConfigTool.loadConfig();
 		
-		GETDOC getdoc = new GETDOC("2400-CAX1053952-5", "en", "G");
+		GETDOC getdoc = new GETDOC("2400-1/CAX1053785", "en", "A");
 		getdoc.exec();
 		
 		System.out.print(getdoc.getResultFilename());

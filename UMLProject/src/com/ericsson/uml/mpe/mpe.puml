@@ -1,0 +1,84 @@
+@startuml
+box "mpe-services-nbia" #LightGreen
+	participant SimpleNorthBoundContainer
+	participant NBIContextImpl
+end box
+box "mpe-business-nbi-cai3g1.2" #LightYellow
+	participant CAI3G12NBImpl
+	participant Cai3gImpl
+	participant CAI3G12Operation
+end box
+box "mpe-services-req-controller" #Wheat
+	participant RequestControllerImpl
+	participant ACSRequestHandler
+end box
+box "mpe-platform-acswrapper" #LightBlue
+	participant ACSWrapperServiceImpl
+end box
+
+[-> SimpleNorthBoundContainer: addNBIContext()[OSGI life cycle]
+activate SimpleNorthBoundContainer
+deactivate SimpleNorthBoundContainer
+[-> SimpleNorthBoundContainer: activate()[OSGI life cycle]
+activate SimpleNorthBoundContainer
+SimpleNorthBoundContainer -> SimpleNorthBoundContainer: startNBIIfLicenseValid()
+activate SimpleNorthBoundContainer
+SimpleNorthBoundContainer -> SimpleNorthBoundContainer: startNBI()
+activate SimpleNorthBoundContainer
+SimpleNorthBoundContainer -> CAI3G12NBImpl: start()
+activate CAI3G12NBImpl
+CAI3G12NBImpl -> SimpleNorthBoundContainer
+deactivate CAI3G12NBImpl
+deactivate SimpleNorthBoundContainer
+deactivate SimpleNorthBoundContainer
+deactivate SimpleNorthBoundContainer
+
+[-> Cai3gImpl: create() [webservice call]
+activate Cai3gImpl
+Cai3gImpl -> CAI3G12Operation: getCreateResponse()
+activate CAI3G12Operation
+note left
+Framework will call handler intercepters for web service calls.
+Such as ProclogHandler, SyncHeaderHandler
+end note
+CAI3G12Operation -> CAI3G12Operation: execute()
+activate CAI3G12Operation
+CAI3G12Operation -> CAI3G12NBImpl: getProvisionService()
+activate CAI3G12NBImpl
+CAI3G12NBImpl -> CAI3G12Operation
+deactivate CAI3G12NBImpl
+CAI3G12Operation -> NBIContextImpl: execute()
+activate NBIContextImpl
+NBIContextImpl -> RequestControllerImpl: send()
+activate RequestControllerImpl
+RequestControllerImpl -> RequestControllerImpl: getNextHandlerInChain()
+activate RequestControllerImpl
+note left
+The next handler for <b>nbia</b> is <b>dve-external</b>
+See annotation of RequestChain.getSyncChain().
+See ServiceIdentity for identity enum definition
+Refer to Distributed MBean Configuration eforge project
+for how PG NGN handle component configurations
+end note
+deactivate RequestControllerImpl
+RequestControllerImpl -> ACSRequestHandler: handle()
+activate ACSRequestHandler
+ACSRequestHandler -> ACSWrapperServiceImpl: execute()
+activate ACSWrapperServiceImpl
+note left
+Go into DVE core
+end note
+ACSWrapperServiceImpl -> ACSRequestHandler
+deactivate ACSWrapperServiceImpl
+ACSRequestHandler -> RequestControllerImpl
+deactivate ACSRequestHandler
+RequestControllerImpl -> NBIContextImpl
+deactivate RequestControllerImpl
+NBIContextImpl -> CAI3G12Operation
+deactivate NBIContextImpl
+deactivate CAI3G12Operation
+CAI3G12Operation -> Cai3gImpl
+deactivate CAI3G12Operation
+deactivate Cai3gImpl
+
+@enduml

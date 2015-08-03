@@ -4,7 +4,7 @@ box "DVE core" #LightGreen
 	participant DataViewEngineBean
 	participant TargetExecutor
 	participant TargetRegistryImpl
-	participant TargetCallable
+	participant TargetCallableValuePackage
 	participant JavaDataViewFactoryProxy
 	participant JavaDataViewProxy
 end box
@@ -57,17 +57,17 @@ deactivate JavaDataViewFactoryProxy
 
 TargetRegistryImpl -> TargetExecutor
 deactivate TargetRegistryImpl
-TargetExecutor -> TargetExecutor: createTargetCallable()
+TargetExecutor -> TargetExecutor: createTargetCallableValuePackage()
 activate TargetExecutor
 deactivate TargetExecutor
 
 TargetExecutor -> TargetThreadPoolExecutor: submit()
 activate TargetThreadPoolExecutor
-TargetThreadPoolExecutor -> TargetCallable: call()
-activate TargetCallable
-TargetCallable -> TargetCallable: executeOperation()
-activate TargetCallable
-TargetCallable -> JavaDataViewProxy: execute()
+TargetThreadPoolExecutor -> TargetCallableValuePackage: call()
+activate TargetCallableValuePackage
+TargetCallableValuePackage -> TargetCallableValuePackage: executeOperation()
+activate TargetCallableValuePackage
+TargetCallableValuePackage -> JavaDataViewProxy: execute()
 activate JavaDataViewProxy
 JavaDataViewProxy -> HSSProvisioningJavaDataView: execute()
 note left
@@ -78,24 +78,24 @@ activate HSSProvisioningJavaDataView
 HSSProvisioningJavaDataView -> JavaDataViewProxy
 deactivate HSSProvisioningJavaDataView
 
-JavaDataViewProxy -> TargetCallable
+JavaDataViewProxy -> TargetCallableValuePackage
 deactivate JavaDataViewProxy
 
-deactivate TargetCallable
-TargetCallable -> TargetCallable: handleResponse()
-activate TargetCallable
-TargetCallable -> TargetCallable: modifyCapacityCounters()
+deactivate TargetCallableValuePackage
+TargetCallableValuePackage -> TargetCallableValuePackage: handleResponse()
+activate TargetCallableValuePackage
+TargetCallableValuePackage -> TargetCallableValuePackage: modifyCapacityCounters()
 note left
 Update license capacity
 end note
 
-activate TargetCallable
-deactivate TargetCallable
+activate TargetCallableValuePackage
+deactivate TargetCallableValuePackage
 
-deactivate TargetCallable
+deactivate TargetCallableValuePackage
 
-TargetCallable -> TargetThreadPoolExecutor
-deactivate TargetCallable
+TargetCallableValuePackage -> TargetThreadPoolExecutor
+deactivate TargetCallableValuePackage
 
 TargetThreadPoolExecutor -> TargetExecutor
 deactivate TargetThreadPoolExecutor

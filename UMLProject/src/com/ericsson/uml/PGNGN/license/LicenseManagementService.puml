@@ -1,0 +1,32 @@
+@startuml
+box "DVE core" #LightGreen
+	participant TargetCallableValuePackage
+end box
+
+[-> TargetCallableValuePackage: handleResponse()
+activate TargetCallableValuePackage
+note right
+Refer to DVE core to JDV
+Only when success response is returned, PG will update license counter 
+end note
+TargetCallableValuePackage -> TargetCallableValuePackage: modifyCapacityCounters()
+activate TargetCallableValuePackage
+TargetCallableValuePackage -> ValuePackageLicenseServiceImpl: modifyCapacityCounter()
+activate ValuePackageLicenseServiceImpl
+ValuePackageLicenseServiceImpl -> ValuePackages: getMoMatchingQName()
+activate ValuePackages
+ValuePackages -> ValuePackageLicenseServiceImpl
+deactivate ValuePackages
+ValuePackageLicenseServiceImpl -> MoImpl: modifyLicenseItemCounters()
+activate MoImpl
+MoImpl -> LicenceItemImpl: countProvisioning()
+activate LicenceItemImpl
+LicenceItemImpl -> MoImpl
+deactivate LicenceItemImpl
+MoImpl -> ValuePackageLicenseServiceImpl
+deactivate MoImpl
+ValuePackageLicenseServiceImpl -> TargetCallableValuePackage
+deactivate ValuePackageLicenseServiceImpl
+deactivate TargetCallableValuePackage
+deactivate TargetCallableValuePackage
+@enduml

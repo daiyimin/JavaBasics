@@ -116,7 +116,7 @@ public class CountryCode {
 			{ "TURKS AND CAICOS ISLANDS", "TC" }, { "TUVALU", "TV" },
 			{ "UGANDA", "UG" }, { "UKRAINE", "UA" },
 			{ "UNITED ARAB EMIRATES", "AE" }, { "UNITED KINGDOM", "GB" },
-			{ "UNITED STATES", "US" },
+			{ "UNITED KINGDOM", "UK" }, { "UNITED STATES", "US" },
 			{ "UNITED STATES MINOR OUTLYING ISLANDS", "UM" },
 			{ "URUGUAY", "UY" }, { "UZBEKISTAN", "UZ" }, { "VANUATU", "VU" },
 			{ "VENEZUELA", "VE" }, { "VIET NAM", "VN" },

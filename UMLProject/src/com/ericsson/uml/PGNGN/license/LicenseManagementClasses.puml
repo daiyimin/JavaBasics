@@ -1,0 +1,73 @@
+@startuml
+class Scheduler {
+}
+Scheduler "1" --> "n" SchedulerListener
+
+class ValuePackages {
+-Map<QName, Mo> qNameMoMapping
+-Map<String, License> licenseMapping
+-Map<String, LicenceItem> licenseItemsMapping
+}
+class Mo {
+~void modifyLicenseItemCounters(String)
+}
+interface Mo {
+}
+class MoImpl implements Mo {
+-List<LicenceItem> licenceItems
+-List<License> licenses
+}
+Interface LicenceItem {
+~void countProvisioning(action)
+}
+class LicenceItemImpl implements LicenceItem {
+-ClusterLong clusteredCapacityCounter
+-Map<License, String[]> licensesBlockingProtocols
+}
+ValuePackages "1" --> "n" Mo
+ValuePackages "1" --> "n" License
+ValuePackages "1" --> "n" LicenceItem
+CommonLicense "1" --> "n" LicenceItem
+MoImpl "1" --> "n" LicenceItem
+MoImpl "1" --> "n" License
+LicenceItemImpl "1" --> "n" License
+
+interface ValuePackageLicenseService {
+~ValuePackageResult addValuePackage(ValuePackageLicense)
+~void modifyCapacityCounter(QName, String)
+}
+class ValuePackageLicenseServiceImpl implements ValuePackageLicenseService {
+-ValuePackages valuePackages
++void setValuePackages(ValuePackages)
+-void registerAndRunScheduler(ValuePackageLicense)
+}
+ValuePackageLicenseServiceImpl "1" --> "n" ValuePackages
+
+interface LicenseNotificationReceiver {
++{abstract}void licenseAdded(CapacityLicense)
++{abstract}void licenseAdded(FeatureLicense)
++{abstract}void licenseUpdated(CapacityLicense)
++{abstract}void licenseUpdated(FeatureLicense)
+}
+class LicenseNotificationReceiverImpl implements LicenseNotificationReceiver {
+-ValuePackageLicenseService valuePackageLicenseService
+}
+LicenseNotificationReceiverImpl "1" --> "1" ValuePackageLicenseService
+
+interface SchedulerListener{
+#void schedulerExpired()
+}
+interface License {
+}
+abstract class CommonLicense implements License, SchedulerListener {
+-List<LicenceItem> licenseItems
+}
+abstract class CapacityLicense extends CommonLicense {
+}
+interface ValuePackage {
++void setCapacity(int)
+}
+class ValuePackageImpl extends CapacityLicense implements ValuePackage {
+}
+
+@enduml

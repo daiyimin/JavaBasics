@@ -13,17 +13,18 @@ ZooKeeperConnectionWatcherImpl -> ZooKeeperConnectionWatcherImpl: getPersistedLi
 activate ZooKeeperConnectionWatcherImpl
 note left
 Calculate new used capacity by adding delta usage of this PL blade
-and used capacity in zookeeper
+and used capacity in zookeeper.
+Then set new used capacity back to zookeeper
 end note
-ZooKeeperConnectionWatcherImpl -> SetDataQuery: executeQuery()
 deactivate ZooKeeperConnectionWatcherImpl
+ZooKeeperConnectionWatcherImpl -> SetDataQuery: executeQuery()
 ZooKeeperConnectionWatcherImpl -> LicenseManagementService
 deactivate ZooKeeperConnectionWatcherImpl
 
 LicenseManagementService -> ZooKeeperConnectionWatcherImpl: getLicenseData()
 activate ZooKeeperConnectionWatcherImpl
 note right
-Read used capacity from zookeeper
+Read used capacity from zookeeper again
 end note
 ZooKeeperConnectionWatcherImpl -> LicenseManagementService
 deactivate ZooKeeperConnectionWatcherImpl

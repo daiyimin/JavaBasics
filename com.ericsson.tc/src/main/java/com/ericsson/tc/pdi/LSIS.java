@@ -34,6 +34,8 @@ public class LSIS {
 	private String childRevision = null;
 	private String childLanguage = null;
 	
+	private boolean find2400 = false;
+	
 	public String getChildNoE() {
 		return childNoE;
 	}
@@ -58,7 +60,8 @@ public class LSIS {
 	}
 	
 	public void exec() throws IOException {
-        ExecCmd exec = new ExecCmd(cmd);
+	logger.info("Start to run pdi lsis:\n " + cmd[2]);
+       ExecCmd exec = new ExecCmd(cmd);
         exec.exec();
         
         StringBuffer sb = new StringBuffer();
@@ -121,9 +124,23 @@ public class LSIS {
 				if (childLanguage.startsWith("U")) {
 					childLanguage = childLanguage.substring(1);
 				}
+				find2400 = true;
 				break;
 			}
 		}
+		if (!find2400) {
+			logger.error("Cannot find 2400.");
+		}
+	}
+	
+	/**
+	 * For some product, 2400 doesn't exist in PRIM<br/>
+	 * For example: CAX 105 2309/1
+	 * @return
+	 * 		true if found, false if not found
+	 */
+	public boolean is2400Found() {
+		return find2400;
 	}
 	
 	public static void main(String[] args) throws IOException {

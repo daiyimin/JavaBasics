@@ -209,98 +209,173 @@ public class SVL3PPBean {
 	public String getEncryptAlgo() {
 		return encryptAlgo;
 	}
+	
+	private boolean setEncrytAlgoForEx1(String encryptAlgo) {
+		boolean success = false;
+		
+		encryptAlgo = encryptAlgo.replaceAll(":", "");
+		
+		int symmetricIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.SYMMETRIC);
+		int asymmetricIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.ASYMMETRIC);
+		int hasIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.HASH);
+		if (symmetricIdxInSVL != -1) {
+			if (asymmetricIdxInSVL != -1) {
+				symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
+						+ SVL3PPBean.SYMMETRIC.length(), asymmetricIdxInSVL);
+			} else if (hasIdxInSVL != -1) {
+				symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
+						+ SVL3PPBean.SYMMETRIC.length(), hasIdxInSVL);
+			} else {
+				symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
+						+ SVL3PPBean.SYMMETRIC.length());
+			}
+			success = true;
+		}
+		if (asymmetricIdxInSVL != -1) {
+			if (hasIdxInSVL != -1) {
+				asymmetricInSVL = encryptAlgo.substring(asymmetricIdxInSVL
+						+ SVL3PPBean.ASYMMETRIC.length(), hasIdxInSVL);
+			} else {
+				asymmetricInSVL = encryptAlgo.substring(asymmetricIdxInSVL
+						+ SVL3PPBean.ASYMMETRIC.length());
+			}
+			success = true;
+		}
+		if (hasIdxInSVL != -1) {
+			hashInSVL = encryptAlgo.substring(hasIdxInSVL + SVL3PPBean.HASH.length());
+			success = true;
+		}
+		return success;
+	}
+	
+	private void pickupEncryptAlgoInString(String encryptAlgo, String delimitor) {
+		String [] words = encryptAlgo.split(delimitor);
+		
+		StringBuffer symmetric = new StringBuffer();
+		StringBuffer asymmetric = new StringBuffer();
+		StringBuffer hash = new StringBuffer();
+		
+		for (String word: words) {
+			word = word.trim();
+			if (EncryptAlgorithm.isSymmetric(word)) {
+				symmetric.append(word).append(",");
+			}
+			if (EncryptAlgorithm.isAsymmetric(word)) {
+				asymmetric.append(word).append(",");
+			}
+			if (EncryptAlgorithm.isHash(word)) {
+				hash.append(word).append(",");
+			}
+		}
+		
+		if (symmetric.length() > 0) {
+			symmetric.deleteCharAt(symmetric.length()-1); // remove last ","
+			symmetricInSVL = symmetric.toString();
+		}
+		if (asymmetric.length() > 0) {
+			asymmetric.deleteCharAt(asymmetric.length()-1); // remove last ","
+			asymmetricInSVL = asymmetric.toString();
+		}
+		if (hash.length() > 0) {
+			hash.deleteCharAt(hash.length()-1); // remove last ","
+			hashInSVL = hash.toString();
+		}
+	}
+	
+	private boolean setEncrytAlgoForEx2(String encryptAlgo) {
+		// check the first and last word in the string, if both of them are not encrypt algorithm, then this is example 2
+		int idx = encryptAlgo.indexOf(" ");
+		if (idx != -1) {
+			if (EncryptAlgorithm.isEncryptAlgorithm(encryptAlgo.substring(0, idx))) {
+				return false;
+			}
+		}
+		idx = encryptAlgo.lastIndexOf(" ");
+		if (idx != -1) {
+			if (EncryptAlgorithm.isEncryptAlgorithm(encryptAlgo.substring(idx + 1))) {
+				return false;
+			}
+		}
+		
+		// start to handle example 2
+		pickupEncryptAlgoInString(encryptAlgo, " ");
+		
+		return true;
+	}
+
+	private boolean setEncrytAlgoForEx3(String encryptAlgo) {
+		// start to handle example 3
+		pickupEncryptAlgoInString(encryptAlgo, ",");
+		
+		return true;
+	}
 
 	public void setEncryptAlgo(String encryptAlgo) {
 		// parse the SVL encrypt algorithm into three part
 		if (encryptAlgo != null && encryptAlgo.length() > 0) {			
-			encryptAlgo = encryptAlgo.replaceAll(":", "");
+			// if there is nonsense content in the encrypt column, have to skip it
+			if (encryptAlgo.equals("TBD")) {
+				return;
+			}
+			
+			this.encryptAlgo = encryptAlgo;
 			
 			// Normally, each encrypt part start with Symmetric, Asymmetric, Hash
 			// Use them as delimiter to parse encrypt info
-			int symmetricIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.SYMMETRIC);
-			int asymmetricIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.ASYMMETRIC);
-			int hasIdxInSVL = encryptAlgo.indexOf(SVL3PPBean.HASH);
-			if (symmetricIdxInSVL != -1) {
-				if (asymmetricIdxInSVL != -1) {
-					symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
-							+ SVL3PPBean.SYMMETRIC.length(), asymmetricIdxInSVL);
-				} else if (hasIdxInSVL != -1) {
-					symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
-							+ SVL3PPBean.SYMMETRIC.length(), hasIdxInSVL);
-				} else {
-					symmetricInSVL = encryptAlgo.substring(symmetricIdxInSVL
-							+ SVL3PPBean.SYMMETRIC.length());
-				}
-			}
-			if (asymmetricIdxInSVL != -1) {
-				if (hasIdxInSVL != -1) {
-					asymmetricInSVL = encryptAlgo.substring(asymmetricIdxInSVL
-							+ SVL3PPBean.ASYMMETRIC.length(), hasIdxInSVL);
-				} else {
-					asymmetricInSVL = encryptAlgo.substring(asymmetricIdxInSVL
-							+ SVL3PPBean.ASYMMETRIC.length());
-				}
-			}
-			if (hasIdxInSVL != -1) {
-				hashInSVL = encryptAlgo.substring(hasIdxInSVL + SVL3PPBean.HASH.length());
+			/*
+			 * Example 1:
+			 * Symmetric: AES(256)
+			 * Asymmetric: RSA(4096)
+			 * Hash: MD5,SHA1,SHA
+			 */
+			if( setEncrytAlgoForEx1(encryptAlgo) ) {
+				return;
 			}
 			
 			// If no delimitor is found, and encrypt info is not empty, then we have to use encrypt algorithm name to find Symmetric, Asymmetric, Hash part
-			if (symmetricIdxInSVL == -1 && asymmetricIdxInSVL == -1 && hasIdxInSVL == -1) {
-				// if there is nonsense content in the encrypt column, have to skip it
-				if (encryptAlgo.equals("TBD")) {
-					return;
-				}
-				
-				encryptAlgo = encryptAlgo.replaceAll("\r", "").replaceAll("\n", ",");
-				String[] encryptAlgoArr = encryptAlgo.split(","); 
-				
-				int flag = 0; // 0 - symmetric, 1 - asymmetric, 2 - hash, 3 quit
-				StringBuffer sb = new StringBuffer();
-				for(String algo: encryptAlgoArr) {
-					algo = algo.trim();
-					if(algo.isEmpty()) {
-						continue;
-					}
-					switch (flag) {
-					case 0:
-						if(EncryptAlgorithm.isSymmetric(algo)) {
-							sb.append(algo).append(",");
-							continue;
-						} else {
-							sb.deleteCharAt(sb.length()-1); // remove last ","
-							symmetricInSVL = sb.toString();
-							sb = new StringBuffer();
-							flag = 1;
-						}
-					case 1:
-						if(EncryptAlgorithm.isAsymmetric(algo)) {
-							sb.append(algo).append(",");
-							continue;
-						} else {
-							sb.deleteCharAt(sb.length()-1);
-							asymmetricInSVL = sb.toString();
-							sb = new StringBuffer();
-							flag = 2;
-						}
-					case 2:
-						if(EncryptAlgorithm.isHash(algo)) {
-							sb.append(algo).append(",");
-							continue;
-						} else {
-							sb.deleteCharAt(sb.length()-1);
-							hashInSVL = sb.toString();
-							flag = 3;
-						}
-					}
-					if (flag == 3) {
-						break;
-					}
-				}
+			/*
+			 * Example 2:
+			 * "SW uses MD5 from the
+JCE library, based on this
+the ECCN is EU=0 and
+US=5D992B"
+			*/
+			if( setEncrytAlgoForEx2(encryptAlgo)) {
+				return;
 			}
+			
+			/*
+			 * Example 3:
+			 * AES (256), DES (56), 3DES (168), 
+Blowfish (128), RC2 (128), RC4 (128), 
+Twofish (256), CAST5 (128), CAST6 (256), Kahzad (128), Serpent (128), TEA (128), ZTEA (128), Camellia (256), DSA (4096), DH (8192), RSA (4096), 
+ElGamal (4096), DHAES (4096), MD160, MD4, SHA2, RIPEMD160, Tiger, SHA1, HMAC-MD5 (512), 
+HMAC-RIPEMD (160), HMAC-SHA1 (512), HMAC-SHA2 (512), MICHAEL MIA, Whirlpool
+			 */
+			if( setEncrytAlgoForEx3(encryptAlgo)) {
+				return;
+			}	
 		}
-		
-		this.encryptAlgo = encryptAlgo;
+	}
+	
+	private void setProductNo(String productNo) {
+		// remove \r and \n in product no
+		productNo = productNo.replaceAll("\r", "").replaceAll("\n", "");	
+		ericProdNo = productNo.substring(0, productNo.length()-3).replaceAll(" ", "");;
+		ericProdNo += " " + productNo.substring(productNo.length()-3);
+/*
+		if (productNo.matches(".*\\dR\\d{1}[A-Z]$")) {
+			// if there is no space between product number and Rstate  
+			//	Example: 4/CAX1053791R1A, 4/CAX1053791/2R1A, 4/CAX 105 3791/2R1A
+			ericProdNo = productNo.substring(0, productNo.length()-3).replaceAll(" ", "");;
+			ericProdNo = " " + productNo.substring(productNo.length()-3);
+		} else {
+			// if there is space between product number and Rstate  
+			// Example: 13/CAX 105 4557 R1A, 4/CAX 105 3983/2 R1A			
+			ericProdNo = productNo.substring(0, productNo.length()-3).replaceAll(" ", "");;
+			ericProdNo = " " + productNo.substring(productNo.length()-3);
+		}
+*/		
 	}
 
 	/**
@@ -313,6 +388,7 @@ public class SVL3PPBean {
 	 */
 	public void setColByName(String name, String value) {
 		name = name.trim();
+		value = value.trim();
 		if (VENDOR_NAME.equals(name)) {
 			vendorName = value;
 		} else if (SW_NAME.equals(name)) {
@@ -324,12 +400,7 @@ public class SVL3PPBean {
 		} else if (SW_VERSION.equals(name)) {
 			swVersion = value;
 		} else if (ERICSSON_PRODUCT_NUMBER.equals(name)) {
-			// remove \r and \n in product no
-			value = value.replaceAll("\r", "").replaceAll("\n", "");			
-			// remove space in product no
-			int idx = value.lastIndexOf(" ");
-			ericProdNo = value.substring(0, idx).replaceAll(" ", "");
-			ericProdNo += value.substring(idx);
+			setProductNo(value);
 		} else if (ERICSSON_3PP_LICENCE_PRODUCT_NUMBER.equals(name)) {
 			eric3ppLicProdNo = value.replaceAll(" ", "");
 		} else if (DESIGN_COUNTRY_OF_ORIGIN.equals(name)) {

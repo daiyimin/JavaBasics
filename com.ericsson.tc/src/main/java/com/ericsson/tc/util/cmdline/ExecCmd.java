@@ -3,6 +3,8 @@ package com.ericsson.tc.util.cmdline;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +68,7 @@ public class ExecCmd {
 	public void exec() {
 		try {
 			Process process = Runtime.getRuntime().exec(cmd);
-			
+
 			StreamDrainer stdout = new StreamDrainer(process.getInputStream());
 			StreamDrainer errout = new StreamDrainer(process.getErrorStream());
 			new Thread(stdout).start();

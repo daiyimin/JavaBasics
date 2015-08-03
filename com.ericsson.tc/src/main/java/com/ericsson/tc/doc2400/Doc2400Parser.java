@@ -12,6 +12,7 @@ public class Doc2400Parser {
 	public static final String SW_NAME_VERSION_END = "Design responsible organization:";
 	public static final String PRODUCT_NAME_START = "Product name/description";
 	public static final String PRODUCT_NAME_END = "Is the product a part of a";
+	public static final String PAPE_EDGE = "Ericsson Internal";
 	
 	public static final String EU_ECCN = "EU ECCN code:";
 	public static final String US_ECCN = "US ECCN code:";
@@ -25,11 +26,15 @@ public class Doc2400Parser {
 	public static final String PROTOCOL_END = "3.5 Other information ";
 	public static final String PROTOCOL_START_2 = "Security \r\nProtocol";
 	public static final String PROTOCOL_END_2 = "Mass \r\nMarket \r\nClassified";
-	
+
 	public static final String ORIG_COUNTRY_START = "Design Origin Countries for SW (to \r\nrecord the history):";
 	public static final String ORIG_COUNTRY_END = "For Country code list see the instruction ";
 	public static final String ORIG_COUNTRY_START_2 = "Design origin design \r\n(Country List)";
 	public static final String ORIG_COUNTRY_END_2 = EU_ECCN_2;
+	public static final String ORIG_COUNTRY_START_3 = "Design origin \r\n(Country List)";
+	public static final String ORIG_COUNTRY_END_3 = EU_ECCN_2;
+	public static final String ORIG_COUNTRY_START_4 = ORIG_COUNTRY_START;
+	public static final String ORIG_COUNTRY_END_4 = "Country List";
 	public static final String US_ORIGIN_START = "US-origin design, YES or NO";
 	public static final String US_ORIGIN_END = EU_ECCN_2;
 
@@ -44,6 +49,8 @@ public class Doc2400Parser {
 	public static final String HASH = "Hash:";
 	public static final String HASH_END_1 = CCATS_START;
 	public static final String HASH_END_2 = "Enter or mark function of encryption?";
+	public static final String HASH_END_3 = "3.2 Usage of encryption in the product";
+	public static final String HASH_END_4 = "License Exceptions";
 	
 	private PdfReader reader;
 	private Doc2400Bean bean;
@@ -66,7 +73,7 @@ public class Doc2400Parser {
 		parseUsEccn(doc2400Text);
 		parseProtocol(doc2400Text);
 		parseOrigCountry(doc2400Text);
-		parseCcats(doc2400Text);
+//		parseCcats(doc2400Text);
 		parseSymmetric(doc2400Text);
 		parseAsymmetric(doc2400Text);
 		parseHash(doc2400Text);
@@ -81,7 +88,16 @@ public class Doc2400Parser {
 		if (endIdx == -1) {
 			return null;
 		}
-		String val = doc2400Text.substring(startIdx + start.length(), endIdx);
+		
+		String val;
+		// when the string is close to page edge, we need to use page edge as delimitor
+		int edgeIdx = doc2400Text.indexOf(PAPE_EDGE, startIdx);
+		if (edgeIdx != -1 && edgeIdx < endIdx) {
+			val = doc2400Text.substring(startIdx + start.length(), edgeIdx);
+		} else {
+			val = doc2400Text.substring(startIdx + start.length(), endIdx);
+		}
+
 		return val.trim();
 	}
 	
@@ -126,6 +142,12 @@ public class Doc2400Parser {
 			val = parseValue(doc2400Text, ORIG_COUNTRY_START_2, ORIG_COUNTRY_END_2);
 		}
 		if (val == null) {
+			val = parseValue(doc2400Text, ORIG_COUNTRY_START_3, ORIG_COUNTRY_END_3);
+		}
+		if (val == null) {
+			val = parseValue(doc2400Text, ORIG_COUNTRY_START_4, ORIG_COUNTRY_END_4);
+		}
+		if (val == null) {
 			val = parseValue(doc2400Text, US_ORIGIN_START, US_ORIGIN_END);
 			if ("yes".equals(val.toLowerCase())) {
 				val = "US";
@@ -158,12 +180,18 @@ public class Doc2400Parser {
 		if (val == null) {
 			val = parseValue(doc2400Text, HASH, HASH_END_2);
 		}
+		if (val == null) {
+			val = parseValue(doc2400Text, HASH, HASH_END_3);
+		}
+		if (val == null) {
+			val = parseValue(doc2400Text, HASH, HASH_END_4);
+		}
 		bean.setHash(val);
 	}
 
 	public static void main(String[] args) throws IOException {
 		ConfigTool.loadConfig();
-		PdfReader reader = new PdfReader("C://Temp//2400-1_CAX1054428_EN_A_PDFV1R2.pdf");
+		PdfReader reader = new PdfReader("C://Temp//2400-1_CAX1055562_EN_A_PDFV1R5.pdf");
 		Doc2400Parser parser = new Doc2400Parser(reader);
 		parser.parse();
 		Doc2400Bean bean = parser.getDoc2400Bean();
@@ -173,7 +201,7 @@ public class Doc2400Parser {
 		System.out.println(bean.getUsEccn());
 		System.out.println(bean.getProtocol());
 		System.out.println(bean.getOrigCountry());
-		System.out.println(bean.getCcats());
+//		System.out.println(bean.getCcats());
 		System.out.println(bean.getSymmetric());
 		System.out.println(bean.getAsymmetric());
 		System.out.println(bean.getHash());

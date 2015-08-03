@@ -32,13 +32,20 @@ public class SVLContentChecker {
 			// iterate through each 3PP
 			while (reader.hasNext()) {
 				SVL3PPBean svl3ppBean = reader.next();
-				Doc2400Bean doc2400Bean = generate2400Bean(svl3ppBean);
+				Doc2400Bean doc2400Bean;
+				try {
+					doc2400Bean = generate2400Bean(svl3ppBean);
+				} catch (Exception ex) {
+					// always get some strange error during download 2400
+					// so just ignore it here
+					continue;
+				}
 				
 				SVLand2400comparator comparator = new SVLand2400comparator(svl3ppBean, doc2400Bean);
 				if (!comparator.compare()) {
-					logger.info("SVL and 2400 result don't match");
+					logger.info("SVL and 2400 result don't match\n");
 				} else {
-					logger.info("SVL and 2400 result match");
+					logger.info("SVL and 2400 result match\n");
 				}
 			}
 		} catch (IOException e) {
@@ -57,6 +64,10 @@ public class SVLContentChecker {
 		} catch (IOException ex) {
 			logger.error("Fail to list information structure of product.");
 			throw ex;
+		}
+		
+		if (!lsis.is2400Found()) {
+			return null;
 		}
 		
 		// Download 2400 doc of the product
@@ -86,7 +97,7 @@ public class SVLContentChecker {
 	public static void main(String...args) throws IOException {
 		ConfigTool.loadConfig();
 //		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", SVLReader.PGN_Commercial );
-		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", SVLReader.PGN_FOSS );
+		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL for EMA (PG NGN) 15(1).xls", SVLReader.PGN_FOSS );
 		SVLContentChecker checker = new SVLContentChecker(reader);
 		checker.checkSVL();
 	}

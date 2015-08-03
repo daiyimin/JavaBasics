@@ -230,7 +230,7 @@ public class SVLReader implements Iterator {
 	
 	public static void main(String...args) throws IOException {
 		ConfigTool.loadConfig();
-		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", PGN_Commercial );
+		SVLReader reader = new SVLReader("src/test/java/com/ericsson/tc/poi/", "SVL.xls", PGN_FOSS );
 		try {
 			reader.readSVL();
 			int count = 0;
