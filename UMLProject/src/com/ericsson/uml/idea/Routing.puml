@@ -1,9 +1,0 @@
-@startuml
-start
-:Format checking;
-:Routing lookup;
-:PL business logic;
-:NL business logic;
-:Send to NE;
-stop
-@enduml
